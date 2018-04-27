@@ -15,6 +15,7 @@ public class MainActivity extends AppCompatActivity {
     private VideoView videoView;
     private MediaController mediaController;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -26,31 +27,38 @@ public class MainActivity extends AppCompatActivity {
 
         File directory = getApplicationContext().getDir(AttachmentDirName, Context.MODE_PRIVATE);
         String filePath = directory.getAbsolutePath();
-        File file = new File(directory, "video.mp4");
+        File file = new File(directory, "video1.mp4");
 
-        startServer(filePath, file);
+
+
+        if (file.exists()) {
+            startServer(filePath, file);
+        } else {
+            startServer(filePath, null);
+        }
+
     }
-
 
     private VideoDownloadAndPlayService videoService;
 
     private void startServer(String filePath, final File file) {
-        videoService = VideoDownloadAndPlayService.startServer(MainActivity.this, "http://192.168.100.13:8080/content/579953aca6f92bb52a5c14270eee7015/images/Triumph Bonneville T100 - Road Test Review - ZigWheels_5a82825d00d03.mp4", filePath + "/video.mp4", "127.0.0.1", file, new VideoDownloadAndPlayService.VideoStreamInterface() {
-            @Override
-            public void onServerStart(String videoStreamUrl) {
-                // use videoStreamUrl to play video through media player
-                Log.d("sachin", "" + videoStreamUrl);
+        videoService = VideoDownloadAndPlayService.startServer(MainActivity.this,
+                "http://192.168.100.13:8080/content/579953aca6f92bb52a5c14270eee7015/images/Triumph Bonneville T100 - Road Test Review - ZigWheels_5a82825d00d03.mp4", filePath + "/video1.mp4", "127.0.0.1", file, new VideoDownloadAndPlayService.VideoStreamInterface() {
+                    @Override
+                    public void onServerStart(String videoStreamUrl) {
+                        // use videoStreamUrl to play video through media player
+                        Log.d("sachin", videoStreamUrl);
 
-                videoView.setMediaController(mediaController);
-                videoView.setKeepScreenOn(true);
-                videoView.setVideoPath(videoStreamUrl);
-                videoView.start();
-                videoView.requestFocus();
-                Log.d("test", "test" + file.toString());
-
-            }
-        });
+                        videoView.setMediaController(mediaController);
+                        videoView.setKeepScreenOn(true);
+                        videoView.setVideoPath(videoStreamUrl);
+                        videoView.start();
+                        videoView.requestFocus();
+//                Log.d("sachin", file.toString());
+                    }
+                });
     }
+
 
     @Override
     public void onStop() {

@@ -65,19 +65,26 @@ public class VideoDownloader extends AsyncTask<String, Integer, Void> {
         long fileSizeInLocalStorage = Long.valueOf(params[2]);
         BufferedInputStream input = null;
         try {
-            final FileOutputStream out = new FileOutputStream(params[1]);
+            final FileOutputStream out = new FileOutputStream(params[1], true);
 
             try {
                 URL url = new URL(params[0]);
 
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                connection.setRequestMethod("GET");
+                connection.setRequestProperty("Range", "bytes=" + fileSizeInLocalStorage + "-");
                 connection.connect();
-                if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
-                    throw new RuntimeException("response is not http_ok");
-                }
-                fileLength = connection.getContentLength();
 
-                if (fileSizeInLocalStorage != fileLength) {
+                Log.e("response code- ", " " + connection.getResponseCode());
+
+                fileLength = connection.getContentLength();
+                Log.e("file length-", "" + fileLength);
+                Log.e("file length local -", "" + fileSizeInLocalStorage);
+
+                if (connection.getResponseCode() == 416) {
+                    readb = (int) fileSizeInLocalStorage;
+                    Log.d("sachin", "video is already downloaded");
+                } else {
                     input = new BufferedInputStream(connection.getInputStream());
                     byte data[] = new byte[1024 * 50];
                     long readBytes = 0;
@@ -85,18 +92,13 @@ public class VideoDownloader extends AsyncTask<String, Integer, Void> {
                     boolean flag = true;
 
                     while ((len = input.read(data)) != -1) {
-                        out.write(data, (int) (fileSizeInLocalStorage), len);
+                        out.write(data, 0, len);
                         out.flush();
                         readBytes += len;
                         readb += len;
-                        Log.w("download", (readb / 1024) + "kb of " + (fileLength / 1024) + "kb");
+                        Log.w("download", (readb) + "b of " + (fileLength) + "b");
                     }
-                } else {
-                    //
-                    Log.d("sachin", "video is already downloaded");
                 }
-
-
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             } catch (IOException e) {

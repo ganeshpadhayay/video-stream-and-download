@@ -5,10 +5,7 @@ package com.example.cub05.videosamplecustom;
  */
 
 import android.app.Activity;
-
-import java.io.File;
-
-import android.app.Activity;
+import android.util.Log;
 
 import java.io.File;
 
@@ -24,9 +21,20 @@ public class VideoDownloadAndPlayService {
     }
 
     public static VideoDownloadAndPlayService startServer(final Activity activity, String videoUrl, String pathToSaveVideo, final String ipOfServer, File file, final VideoStreamInterface callback) {
-        new VideoDownloader().execute(videoUrl, pathToSaveVideo, String.valueOf(file.length()));
-        server = new LocalFileStreamingServer(new File(pathToSaveVideo));
-        server.setSupportPlayWhileDownloading(true);
+
+        if (file == null) {
+            Log.d("sachin", "file null");
+            new VideoDownloader().execute(videoUrl, pathToSaveVideo, "0");
+            server = new LocalFileStreamingServer(new File(pathToSaveVideo));
+            server.setSupportPlayWhileDownloading(true);
+        } else {
+            Log.d("sachin", "file not null");
+            Log.d("sachin", "file size "+file.length());
+            new VideoDownloader().execute(videoUrl, pathToSaveVideo, String.valueOf(file.length()));
+            server = new LocalFileStreamingServer(file);
+            server.setSupportPlayWhileDownloading(true);
+        }
+
         new Thread(new Runnable() {
             @Override
             public void run() {

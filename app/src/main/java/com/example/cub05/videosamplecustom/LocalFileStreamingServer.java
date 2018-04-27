@@ -28,8 +28,7 @@ import java.util.StringTokenizer;
  * A single-connection HTTP server that will respond to requests for files and
  * pull them from the application's SD card.
  */
-public class LocalFileStreamingServer implements Runnable
-{
+public class LocalFileStreamingServer implements Runnable {
     private static final String TAG = LocalFileStreamingServer.class.getName();
     private int port = 0;
     private boolean isRunning = false;
@@ -44,16 +43,14 @@ public class LocalFileStreamingServer implements Runnable
     /**
      * This server accepts HTTP request and returns files from device.
      */
-    public LocalFileStreamingServer(File file)
-    {
+    public LocalFileStreamingServer(File file) {
         mMovieFile = file;
     }
 
     /**
      * @return A port number assigned by the OS.
      */
-    public int getPort()
-    {
+    public int getPort() {
         return port;
     }
 
@@ -63,11 +60,9 @@ public class LocalFileStreamingServer implements Runnable
      * This only needs to be called once per instance. Once initialized, the
      * server can be started and stopped as needed.
      */
-    public String init(String ip)
-    {
+    public String init(String ip) {
         String url = null;
-        try
-        {
+        try {
             InetAddress inet = InetAddress.getByName(ip);
             byte[] bytes = inet.getAddress();
             socket = new ServerSocket(port, 0, InetAddress.getByAddress(bytes));
@@ -77,18 +72,15 @@ public class LocalFileStreamingServer implements Runnable
             url = "http://" + socket.getInetAddress().getHostAddress() + ":"
                     + port;
             Log.e(TAG, "Server started at " + url);
-        } catch (UnknownHostException e)
-        {
+        } catch (UnknownHostException e) {
             Log.e(TAG, "Error UnknownHostException server", e);
-        } catch (IOException e)
-        {
+        } catch (IOException e) {
             Log.e(TAG, "Error IOException server", e);
         }
         return url;
     }
 
-    public String getFileUrl()
-    {
+    public String getFileUrl() {
         return "http://" + socket.getInetAddress().getHostAddress() + ":"
                 + port + "/" + mMovieFile.getName();
     }
@@ -96,8 +88,7 @@ public class LocalFileStreamingServer implements Runnable
     /**
      * Start the server.
      */
-    public void start()
-    {
+    public void start() {
         thread = new Thread(this);
         thread.start();
         isRunning = true;
@@ -109,11 +100,9 @@ public class LocalFileStreamingServer implements Runnable
      * This stops the thread listening to the port. It may take up to five
      * seconds to close the service and this call blocks until that occurs.
      */
-    public void stop()
-    {
+    public void stop() {
         isRunning = false;
-        if (thread == null)
-        {
+        if (thread == null) {
             Log.e(TAG, "Server was stopped without being started.");
             return;
         }
@@ -128,8 +117,7 @@ public class LocalFileStreamingServer implements Runnable
      * @return <code>true</code> if the server is running, otherwise
      * <code>false</code>
      */
-    public boolean isRunning()
-    {
+    public boolean isRunning() {
         return isRunning;
     }
 
@@ -137,16 +125,12 @@ public class LocalFileStreamingServer implements Runnable
      * This is used internally by the server and should not be called directly.
      */
     @Override
-    public void run()
-    {
+    public void run() {
         Log.e(TAG, "running");
-        while (isRunning)
-        {
-            try
-            {
+        while (isRunning) {
+            try {
                 Socket client = socket.accept();
-                if (client == null)
-                {
+                if (client == null) {
                     continue;
                 }
                 Log.e(TAG, "client connected at " + port);
@@ -154,12 +138,10 @@ public class LocalFileStreamingServer implements Runnable
                         mMovieFile);
                 Log.e(TAG, "processing request...");
                 processRequest(data, client);
-            } catch (SocketTimeoutException e)
-            {
+            } catch (SocketTimeoutException e) {
                 Log.e(TAG, "No client connected, waiting for client...", e);
                 // Do nothing
-            } catch (IOException e)
-            {
+            } catch (IOException e) {
                 Log.e(TAG, "Error connecting to client", e);
                 // break;
             }
@@ -171,11 +153,9 @@ public class LocalFileStreamingServer implements Runnable
      * Find byte index separating header from body. It must be the last byte of
      * the first two sequential new lines.
      **/
-    private int findHeaderEnd(final byte[] buf, int rlen)
-    {
+    private int findHeaderEnd(final byte[] buf, int rlen) {
         int splitbyte = 0;
-        while (splitbyte + 3 < rlen)
-        {
+        while (splitbyte + 3 < rlen) {
             if (buf[splitbyte] == '\r' && buf[splitbyte + 1] == '\n'
                     && buf[splitbyte + 2] == '\r' && buf[splitbyte + 3] == '\n')
                 return splitbyte + 4;
@@ -189,10 +169,8 @@ public class LocalFileStreamingServer implements Runnable
      * and content.
      */
     private void processRequest(ExternalResourceDataSource dataSource,
-                                Socket client) throws IllegalStateException, IOException
-    {
-        if (dataSource == null)
-        {
+                                Socket client) throws IllegalStateException, IOException {
+        if (dataSource == null) {
             Log.e(TAG, "Invalid (null) resource.");
             client.close();
             return;
@@ -204,8 +182,7 @@ public class LocalFileStreamingServer implements Runnable
         int rlen = 0;
         {
             int read = is.read(buf, 0, bufsize);
-            while (read > 0)
-            {
+            while (read > 0) {
                 rlen += read;
                 splitbyte = findHeaderEnd(buf, rlen);
                 if (splitbyte > 0)
@@ -221,29 +198,24 @@ public class LocalFileStreamingServer implements Runnable
         Properties parms = new Properties();
         Properties header = new Properties();
 
-        try
-        {
+        try {
             decodeHeader(hin, pre, parms, header);
-        } catch (InterruptedException e1)
-        {
+        } catch (InterruptedException e1) {
             Log.e(TAG, "Exception: " + e1.getMessage());
             e1.printStackTrace();
         }
-        for (Map.Entry<Object, Object> e : header.entrySet())
-        {
+        for (Map.Entry<Object, Object> e : header.entrySet()) {
             Log.e(TAG, "Header: " + e.getKey() + " : " + e.getValue());
         }
         String range = header.getProperty("range");
         cbSkip = 0;
         seekRequest = false;
-        if (range != null)
-        {
+        if (range != null) {
             Log.e(TAG, "range is: " + range);
             seekRequest = true;
             range = range.substring(6);
             int charPos = range.indexOf('-');
-            if (charPos > 0)
-            {
+            if (charPos > 0) {
                 range = range.substring(0, charPos);
             }
             cbSkip = Long.parseLong(range);
@@ -251,8 +223,7 @@ public class LocalFileStreamingServer implements Runnable
         }
         String headers = "";
         // Log.e(TAG, "is seek request: " + seekRequest);
-        if (seekRequest)
-        {// It is a seek or skip request if there's a Range
+        if (seekRequest) {// It is a seek or skip request if there's a Range
             // header
             headers += "HTTP/1.1 206 Partial Content\r\n";
             headers += "Content-Type: " + dataSource.getContentType() + "\r\n";
@@ -262,8 +233,7 @@ public class LocalFileStreamingServer implements Runnable
             headers += "Content-Range: bytes " + cbSkip + "-"
                     + dataSource.getContentLength(true) + "/*\r\n";
             headers += "\r\n";
-        } else
-        {
+        } else {
             headers += "HTTP/1.1 200 OK\r\n";
             headers += "Content-Type: " + dataSource.getContentType() + "\r\n";
             headers += "Accept-Ranges: bytes\r\n";
@@ -273,8 +243,7 @@ public class LocalFileStreamingServer implements Runnable
         }
 
         InputStream data = null;
-        try
-        {
+        try {
             data = dataSource.createInputStream();
             byte[] buffer = headers.getBytes();
             Log.e(TAG, "writing to client");
@@ -285,47 +254,39 @@ public class LocalFileStreamingServer implements Runnable
             byte[] buff = new byte[1024 * 50];
             Log.e(TAG, "No of bytes skipped: " + data.skip(cbSkip));
             int cbSentThisBatch = 0;
-            while (isRunning)
-            {
-                if (supportPlayWhileDownloading)
-                {
+            while (isRunning) {
+                if (supportPlayWhileDownloading) {
                     // Check if data is ready
-                    while (!VideoDownloader.isDataReady())
-                    {
-                        if (VideoDownloader.dataStatus == VideoDownloader.DATA_READY)
-                        {
+                    while (!VideoDownloader.isDataReady()) {
+                        if (VideoDownloader.dataStatus == VideoDownloader.DATA_READY) {
                             Log.e(TAG, "error in reading bytess**********(Data ready)");
                             break;
-                        } else if (VideoDownloader.dataStatus == VideoDownloader.DATA_CONSUMED)
-                        {
+                        } else if (VideoDownloader.dataStatus == VideoDownloader.DATA_CONSUMED) {
                             Log.e(TAG, "error in reading bytess**********(All Data consumed)");
                             break;
-                        } else if (VideoDownloader.dataStatus == VideoDownloader.DATA_NOT_READY)
-                        {
+                        } else if (VideoDownloader.dataStatus == VideoDownloader.DATA_NOT_READY) {
                             Log.e(TAG, "error in reading bytess**********(Data not ready)");
-                        } else if (VideoDownloader.dataStatus == VideoDownloader.DATA_NOT_AVAILABLE)
-                        {
+                        } else if (VideoDownloader.dataStatus == VideoDownloader.DATA_NOT_AVAILABLE) {
                             Log.e(TAG, "error in reading bytess**********(Data not available)");
                         }
                         // wait for a second if data is not ready
-                        synchronized (this)
-                        {
+                        synchronized (this) {
                             Thread.sleep(1000);
                         }
                     }
                     Log.e(TAG, "error in reading bytess**********(Data ready)");
+                } else {
+                    Log.d("sachin", "supportPlayWhileDownloading false");
                 }
 
                 int cbRead = data.read(buff, 0, buff.length);
-                if (cbRead == -1)
-                {
+                if (cbRead == -1) {
                     Log.e(TAG,
                             "readybytes are -1 and this is simulate streaming, close the ips and create another  ");
                     data.close();
                     data = dataSource.createInputStream();
                     cbRead = data.read(buff, 0, buff.length);
-                    if (cbRead == -1)
-                    {
+                    if (cbRead == -1) {
                         Log.e(TAG, "error in reading bytess**********");
                         throw new IOException(
                                 "Error re-opening data source for looping.");
@@ -336,30 +297,24 @@ public class LocalFileStreamingServer implements Runnable
                 cbSkip += cbRead;
                 cbSentThisBatch += cbRead;
 
-                if(supportPlayWhileDownloading)
+                if (supportPlayWhileDownloading)
                     VideoDownloader.consumedb += cbRead;
             }
             Log.e(TAG, "cbSentThisBatch: " + cbSentThisBatch);
             // If we did nothing this batch, block for a second
-            if (cbSentThisBatch == 0)
-            {
+            if (cbSentThisBatch == 0) {
                 Log.e(TAG, "Blocking until more data appears");
                 Thread.sleep(1000);
             }
-        } catch (SocketException e)
-        {
+        } catch (SocketException e) {
             // Ignore when the client breaks connection
             Log.e(TAG, "Ignoring " + e.getMessage());
-        } catch (IOException e)
-        {
+        } catch (IOException e) {
             Log.e(TAG, "Error getting content stream.", e);
-        } catch (Exception e)
-        {
+        } catch (Exception e) {
             Log.e(TAG, "Error streaming file content.", e);
-        } finally
-        {
-            if (data != null)
-            {
+        } finally {
+            if (data != null) {
                 data.close();
             }
             client.close();
@@ -371,10 +326,8 @@ public class LocalFileStreamingServer implements Runnable
      * value pairs
      **/
     private void decodeHeader(BufferedReader in, Properties pre,
-                              Properties parms, Properties header) throws InterruptedException
-    {
-        try
-        {
+                              Properties parms, Properties header) throws InterruptedException {
+        try {
             // Read the request line
             String inLine = in.readLine();
             if (inLine == null)
@@ -395,8 +348,7 @@ public class LocalFileStreamingServer implements Runnable
 
             // Decode parameters from the URI
             int qmi = uri.indexOf('?');
-            if (qmi >= 0)
-            {
+            if (qmi >= 0) {
                 decodeParms(uri.substring(qmi + 1), parms);
                 uri = decodePercent(uri.substring(0, qmi));
             } else
@@ -406,11 +358,9 @@ public class LocalFileStreamingServer implements Runnable
             // followed by HTTP headers. Ignore version but parse headers.
             // NOTE: this now forces header names lowercase since they are
             // case insensitive and vary by client.
-            if (st.hasMoreTokens())
-            {
+            if (st.hasMoreTokens()) {
                 String line = in.readLine();
-                while (line != null && line.trim().length() > 0)
-                {
+                while (line != null && line.trim().length() > 0) {
                     int p = line.indexOf(':');
                     if (p >= 0)
                         header.put(line.substring(0, p).trim().toLowerCase(),
@@ -420,8 +370,7 @@ public class LocalFileStreamingServer implements Runnable
             }
 
             pre.put("uri", uri);
-        } catch (IOException ioe)
-        {
+        } catch (IOException ioe) {
             Log.e(TAG,
                     "SERVER INTERNAL ERROR: IOException: " + ioe.getMessage());
         }
@@ -435,14 +384,12 @@ public class LocalFileStreamingServer implements Runnable
      * replace the Properties with a Hashtable of Vectors or such.
      */
     private void decodeParms(String parms, Properties p)
-            throws InterruptedException
-    {
+            throws InterruptedException {
         if (parms == null)
             return;
 
         StringTokenizer st = new StringTokenizer(parms, "&");
-        while (st.hasMoreTokens())
-        {
+        while (st.hasMoreTokens()) {
             String e = st.nextToken();
             int sep = e.indexOf('=');
             if (sep >= 0)
@@ -455,16 +402,12 @@ public class LocalFileStreamingServer implements Runnable
      * Decodes the percent encoding scheme. <br/>
      * For example: "an+example%20string" -> "an example string"
      */
-    private String decodePercent(String str) throws InterruptedException
-    {
-        try
-        {
+    private String decodePercent(String str) throws InterruptedException {
+        try {
             StringBuffer sb = new StringBuffer();
-            for (int i = 0; i < str.length(); i++)
-            {
+            for (int i = 0; i < str.length(); i++) {
                 char c = str.charAt(i);
-                switch (c)
-                {
+                switch (c) {
                     case '+':
                         sb.append(' ');
                         break;
@@ -479,35 +422,30 @@ public class LocalFileStreamingServer implements Runnable
                 }
             }
             return sb.toString();
-        } catch (Exception e)
-        {
+        } catch (Exception e) {
             Log.e(TAG, "BAD REQUEST: Bad percent-encoding.");
             return null;
         }
     }
 
-    public boolean isSupportPlayWhileDownloading()
-    {
+    public boolean isSupportPlayWhileDownloading() {
         return supportPlayWhileDownloading;
     }
 
-    public void setSupportPlayWhileDownloading(boolean supportPlayWhileDownloading)
-    {
+    public void setSupportPlayWhileDownloading(boolean supportPlayWhileDownloading) {
         this.supportPlayWhileDownloading = supportPlayWhileDownloading;
     }
 
     /**
      * provides meta-data and access to a stream for resources on SD card.
      */
-    protected class ExternalResourceDataSource
-    {
+    protected class ExternalResourceDataSource {
 
         private final File movieResource;
         long contentLength;
         private FileInputStream inputStream;
 
-        public ExternalResourceDataSource(File resource)
-        {
+        public ExternalResourceDataSource(File resource) {
             movieResource = resource;
             Log.e(TAG, "respurcePath is: " + mMovieFile.getPath());
         }
@@ -518,8 +456,7 @@ public class LocalFileStreamingServer implements Runnable
          *
          * @return A MIME content type.
          */
-        public String getContentType()
-        {
+        public String getContentType() {
             // TODO: Support other media if we need to
             return "video/mp4";
         }
@@ -532,8 +469,7 @@ public class LocalFileStreamingServer implements Runnable
          * @throws IOException If the implementing class produces an error when opening
          *                     the stream.
          */
-        public InputStream createInputStream() throws IOException
-        {
+        public InputStream createInputStream() throws IOException {
             // NB: Because createInputStream can only be called once per asset
             // we always create a new file descriptor here.
             getInputStream();
@@ -550,22 +486,17 @@ public class LocalFileStreamingServer implements Runnable
          *
          * @return The length of the resource in bytes.
          */
-        public long getContentLength(boolean ignoreSimulation)
-        {
-            if (!ignoreSimulation)
-            {
+        public long getContentLength(boolean ignoreSimulation) {
+            if (!ignoreSimulation) {
                 return -1;
             }
             return contentLength;
         }
 
-        private void getInputStream()
-        {
-            try
-            {
+        private void getInputStream() {
+            try {
                 inputStream = new FileInputStream(movieResource);
-            } catch (FileNotFoundException e)
-            {
+            } catch (FileNotFoundException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
