@@ -208,6 +208,7 @@ public class LocalFileStreamingServer implements Runnable {
             Log.e(TAG, "Header: " + e.getKey() + " : " + e.getValue());
         }
         String range = header.getProperty("range");
+
         cbSkip = 0;
         seekRequest = false;
         if (range != null) {
@@ -222,7 +223,7 @@ public class LocalFileStreamingServer implements Runnable {
             Log.e(TAG, "range found!! " + cbSkip);
         }
         String headers = "";
-        // Log.e(TAG, "is seek request: " + seekRequest);
+         Log.e("sachin", "is seek request: " + seekRequest);
         if (seekRequest) {// It is a seek or skip request if there's a Range
             // header
             headers += "HTTP/1.1 206 Partial Content\r\n";

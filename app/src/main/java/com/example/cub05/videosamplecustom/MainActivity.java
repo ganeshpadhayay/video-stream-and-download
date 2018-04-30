@@ -24,12 +24,9 @@ public class MainActivity extends AppCompatActivity {
         mediaController = new MediaController(this);
         mediaController.setAnchorView(videoView);
 
-
         File directory = getApplicationContext().getDir(AttachmentDirName, Context.MODE_PRIVATE);
         String filePath = directory.getAbsolutePath();
         File file = new File(directory, "video1.mp4");
-
-
 
         if (file.exists()) {
             startServer(filePath, file);
@@ -58,7 +55,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
     }
-
 
     @Override
     public void onStop() {
