@@ -5,6 +5,8 @@ package com.example.cub05.videosamplecustom;
  */
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 
 import java.io.File;
@@ -14,6 +16,7 @@ import java.io.File;
  */
 
 public class VideoDownloadAndPlayService {
+
     private static LocalFileStreamingServer server;
 
     private VideoDownloadAndPlayService(LocalFileStreamingServer server) {
@@ -22,16 +25,24 @@ public class VideoDownloadAndPlayService {
 
     public static VideoDownloadAndPlayService startServer(final Activity activity, String videoUrl, String pathToSaveVideo, final String ipOfServer, File file, final VideoStreamInterface callback) {
 
+        SharedPreferences sharedpreferences = activity.getSharedPreferences("FilePref", Context.MODE_PRIVATE);
+        boolean downloaded = sharedpreferences.getBoolean("downloaded", false);
+        Log.e("shared", sharedpreferences.getBoolean("downloaded", false) + "");
+
+
         if (file == null) {
             Log.d("sachin", "file null");
-            new VideoDownloader().execute(videoUrl, pathToSaveVideo, "0");
-            server = new LocalFileStreamingServer(new File(pathToSaveVideo));
+            new VideoDownloader(activity).execute(videoUrl, pathToSaveVideo, "0");
+            server = new LocalFileStreamingServer(new File(pathToSaveVideo), activity);
             server.setSupportPlayWhileDownloading(true);
+        } else if (downloaded) {
+            server = new LocalFileStreamingServer(file, activity);
+            server.setSupportPlayWhileDownloading(false);
         } else {
             Log.d("sachin", "file not null");
-            Log.d("sachin", "file size "+file.length());
-            new VideoDownloader().execute(videoUrl, pathToSaveVideo, String.valueOf(file.length()));
-            server = new LocalFileStreamingServer(file);
+            Log.d("sachin", "file size " + file.length());
+            new VideoDownloader(activity).execute(videoUrl, pathToSaveVideo, String.valueOf(file.length()));
+            server = new LocalFileStreamingServer(file, activity);
             server.setSupportPlayWhileDownloading(true);
         }
 

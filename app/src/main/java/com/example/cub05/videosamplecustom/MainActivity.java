@@ -1,6 +1,8 @@
 package com.example.cub05.videosamplecustom;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -20,6 +22,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        SharedPreferences pref = getApplicationContext().getSharedPreferences("FilePref", 0); // 0 - for private mode
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putLong("fileSize", 0);
+        editor.putBoolean("downloaded", false);
+        editor.apply();
+
         videoView = (VideoView) findViewById(R.id.videoView);
         mediaController = new MediaController(this);
         mediaController.setAnchorView(videoView);

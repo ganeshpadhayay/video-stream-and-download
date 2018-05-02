@@ -1,5 +1,7 @@
 package com.example.cub05.videosamplecustom;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -20,7 +22,14 @@ public class VideoDownloader extends AsyncTask<String, Integer, Void> {
     public static final int DATA_NOT_READY = 2;
     public static final int DATA_CONSUMED = 3;
     public static final int DATA_NOT_AVAILABLE = 4;
+    private Context context;
 
+
+    SharedPreferences sharedpreferences;
+
+    public VideoDownloader(Context context) {
+        this.context = context;
+    }
 
     public static int dataStatus = -1;
 
@@ -78,6 +87,12 @@ public class VideoDownloader extends AsyncTask<String, Integer, Void> {
                 Log.e("response code- ", " " + connection.getResponseCode());
 
                 fileLength = connection.getContentLength();
+
+                sharedpreferences = context.getSharedPreferences("FilePref", Context.MODE_PRIVATE);
+//                sharedpreferences.edit().putLong("fileSize", fileLength).apply();
+//                Log.e("shared VDLdr ", sharedpreferences.getLong("fileSize", -1L) + "");
+
+
                 Log.e("file length-", "" + fileLength);
                 Log.e("file length local -", "" + fileSizeInLocalStorage);
 
@@ -120,6 +135,8 @@ public class VideoDownloader extends AsyncTask<String, Integer, Void> {
     @Override
     protected void onPostExecute(Void aVoid) {
         super.onPostExecute(aVoid);
+        sharedpreferences.edit().putBoolean("downloaded", true).apply();
+        Log.e("shared VDownldr onPost", sharedpreferences.getBoolean("downloaded", false) + "");
         Log.w("download", "Done");
 
     }

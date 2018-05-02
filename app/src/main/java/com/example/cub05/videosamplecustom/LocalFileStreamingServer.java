@@ -4,6 +4,8 @@ package com.example.cub05.videosamplecustom;
  * Created by cub05 on 4/25/2018.
  */
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -37,14 +39,16 @@ public class LocalFileStreamingServer implements Runnable {
     private long cbSkip;
     private boolean seekRequest;
     private File mMovieFile;
+    private Context context;
 
     private boolean supportPlayWhileDownloading = false;
 
     /**
      * This server accepts HTTP request and returns files from device.
      */
-    public LocalFileStreamingServer(File file) {
+    public LocalFileStreamingServer(File file, Context context) {
         mMovieFile = file;
+        this.context = context;
     }
 
     /**
@@ -223,7 +227,7 @@ public class LocalFileStreamingServer implements Runnable {
             Log.e(TAG, "range found!! " + cbSkip);
         }
         String headers = "";
-         Log.e("sachin", "is seek request: " + seekRequest);
+        Log.e("sachin", "is seek request: " + seekRequest);
         if (seekRequest) {// It is a seek or skip request if there's a Range
             // header
             headers += "HTTP/1.1 206 Partial Content\r\n";
@@ -298,8 +302,17 @@ public class LocalFileStreamingServer implements Runnable {
                 cbSkip += cbRead;
                 cbSentThisBatch += cbRead;
 
-                if (supportPlayWhileDownloading)
-                    VideoDownloader.consumedb += cbRead;
+
+                SharedPreferences sharedpreferences = context.getSharedPreferences("FilePref", Context.MODE_PRIVATE);
+                boolean downloaded = sharedpreferences.getBoolean("downloaded", false);
+                Log.e("shared test", sharedpreferences.getBoolean("downloaded", false) + "");
+
+                if (!downloaded) {
+                    Log.e("shared LocalFile", "not downloaded");
+                    if (supportPlayWhileDownloading)
+                        VideoDownloader.consumedb += cbRead;
+                }
+
             }
             Log.e(TAG, "cbSentThisBatch: " + cbSentThisBatch);
             // If we did nothing this batch, block for a second
