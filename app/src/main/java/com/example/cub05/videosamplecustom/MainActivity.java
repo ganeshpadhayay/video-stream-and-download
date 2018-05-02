@@ -25,8 +25,7 @@ public class MainActivity extends AppCompatActivity {
 
         SharedPreferences pref = getApplicationContext().getSharedPreferences("FilePref", 0); // 0 - for private mode
         SharedPreferences.Editor editor = pref.edit();
-        editor.putLong("fileSize", 0);
-        editor.putBoolean("downloaded", false);
+        editor.putInt("download_status", 0);
         editor.apply();
 
         videoView = (VideoView) findViewById(R.id.videoView);

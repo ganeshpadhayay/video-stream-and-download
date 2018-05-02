@@ -26,8 +26,8 @@ public class VideoDownloadAndPlayService {
     public static VideoDownloadAndPlayService startServer(final Activity activity, String videoUrl, String pathToSaveVideo, final String ipOfServer, File file, final VideoStreamInterface callback) {
 
         SharedPreferences sharedpreferences = activity.getSharedPreferences("FilePref", Context.MODE_PRIVATE);
-        boolean downloaded = sharedpreferences.getBoolean("downloaded", false);
-        Log.e("shared", sharedpreferences.getBoolean("downloaded", false) + "");
+        int download_status = sharedpreferences.getInt("download_status", -1);
+        Log.e("shared", sharedpreferences.getInt("download_status", -1) + "");
 
 
         if (file == null) {
@@ -35,7 +35,7 @@ public class VideoDownloadAndPlayService {
             new VideoDownloader(activity).execute(videoUrl, pathToSaveVideo, "0");
             server = new LocalFileStreamingServer(new File(pathToSaveVideo), activity);
             server.setSupportPlayWhileDownloading(true);
-        } else if (downloaded) {
+        } else if (download_status == 1) {
             server = new LocalFileStreamingServer(file, activity);
             server.setSupportPlayWhileDownloading(false);
         } else {

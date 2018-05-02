@@ -29,6 +29,7 @@ public class VideoDownloader extends AsyncTask<String, Integer, Void> {
 
     public VideoDownloader(Context context) {
         this.context = context;
+        sharedpreferences = context.getSharedPreferences("FilePref", Context.MODE_PRIVATE);
     }
 
     public static int dataStatus = -1;
@@ -88,10 +89,6 @@ public class VideoDownloader extends AsyncTask<String, Integer, Void> {
 
                 fileLength = connection.getContentLength();
 
-                sharedpreferences = context.getSharedPreferences("FilePref", Context.MODE_PRIVATE);
-//                sharedpreferences.edit().putLong("fileSize", fileLength).apply();
-//                Log.e("shared VDLdr ", sharedpreferences.getLong("fileSize", -1L) + "");
-
 
                 Log.e("file length-", "" + fileLength);
                 Log.e("file length local -", "" + fileSizeInLocalStorage);
@@ -135,8 +132,8 @@ public class VideoDownloader extends AsyncTask<String, Integer, Void> {
     @Override
     protected void onPostExecute(Void aVoid) {
         super.onPostExecute(aVoid);
-        sharedpreferences.edit().putBoolean("downloaded", true).apply();
-        Log.e("shared VDownldr onPost", sharedpreferences.getBoolean("downloaded", false) + "");
+        sharedpreferences.edit().putInt("download_status", 1).apply();
+        Log.e("shared VDownldr onPost", sharedpreferences.getInt("download_status", -1) + "");
         Log.w("download", "Done");
 
     }

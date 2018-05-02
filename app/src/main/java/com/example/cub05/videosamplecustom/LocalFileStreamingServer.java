@@ -304,10 +304,10 @@ public class LocalFileStreamingServer implements Runnable {
 
 
                 SharedPreferences sharedpreferences = context.getSharedPreferences("FilePref", Context.MODE_PRIVATE);
-                boolean downloaded = sharedpreferences.getBoolean("downloaded", false);
-                Log.e("shared test", sharedpreferences.getBoolean("downloaded", false) + "");
+                int download_status = sharedpreferences.getInt("download_status", -1);
+                Log.e("shared test", sharedpreferences.getInt("download_status", -1) + "");
 
-                if (!downloaded) {
+                if (download_status != 1) {
                     Log.e("shared LocalFile", "not downloaded");
                     if (supportPlayWhileDownloading)
                         VideoDownloader.consumedb += cbRead;
