@@ -27,7 +27,7 @@ public class VideoDownloadAndPlayService {
 
         SharedPreferences sharedpreferences = activity.getSharedPreferences("FilePref", Context.MODE_PRIVATE);
         int download_status = sharedpreferences.getInt("download_status", -1);
-        Log.e("shared", sharedpreferences.getInt("download_status", -1) + "");
+        Log.e("shared", download_status+ "");
 
 
         if (file == null) {

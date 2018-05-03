@@ -61,7 +61,7 @@ public class VideoDownloader extends AsyncTask<String, Integer, Void> {
     /**
      * Keeps track of all bytes read on each while iteration
      */
-    private static int readb = 0;
+    public static int readb = 0;
 
     /**
      * Length of file being downloaded.
@@ -88,7 +88,7 @@ public class VideoDownloader extends AsyncTask<String, Integer, Void> {
                 Log.e("response code- ", " " + connection.getResponseCode());
 
                 fileLength = connection.getContentLength();
-
+                sharedpreferences.edit().putLong("file_length", fileLength).apply();
 
                 Log.e("file length-", "" + fileLength);
                 Log.e("file length local -", "" + fileSizeInLocalStorage);
@@ -108,7 +108,7 @@ public class VideoDownloader extends AsyncTask<String, Integer, Void> {
                         out.flush();
                         readBytes += len;
                         readb += len;
-                        Log.w("download", (readb) + "b of " + (fileLength) + "b");
+                      //  Log.w("download", (readb) + "b of " + (fileLength) + "b");
                     }
                 }
             } catch (MalformedURLException e) {

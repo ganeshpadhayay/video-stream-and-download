@@ -40,6 +40,7 @@ public class LocalFileStreamingServer implements Runnable {
     private boolean seekRequest;
     private File mMovieFile;
     private Context context;
+    private MediaPlayerCallBacks mediaPlayerCallBacks;
 
     private boolean supportPlayWhileDownloading = false;
 
@@ -230,14 +231,29 @@ public class LocalFileStreamingServer implements Runnable {
         Log.e("sachin", "is seek request: " + seekRequest);
         if (seekRequest) {// It is a seek or skip request if there's a Range
             // header
+            if (cbSkip > dataSource.getContentLength(true)) {
+                while (cbSkip+cbSkip*.05 > VideoDownloader.readb) {
+                    Log.e("sachin ", cbSkip + " cbSkip");
+                    Log.e("sachin ", VideoDownloader.readb + " readDb");
+                    synchronized (this) {
+                        try {
+                            Log.e("sachin", "thread sleeping");
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+
             headers += "HTTP/1.1 206 Partial Content\r\n";
             headers += "Content-Type: " + dataSource.getContentType() + "\r\n";
             headers += "Accept-Ranges: bytes\r\n";
             headers += "Content-Length: " + dataSource.getContentLength(false)
                     + "\r\n";
-            headers += "Content-Range: bytes " + cbSkip + "-"
-                    + dataSource.getContentLength(true) + "/*\r\n";
+            headers += "Content-Range: bytes " + cbSkip + "-\r\n";
             headers += "\r\n";
+
         } else {
             headers += "HTTP/1.1 200 OK\r\n";
             headers += "Content-Type: " + dataSource.getContentType() + "\r\n";
@@ -246,6 +262,7 @@ public class LocalFileStreamingServer implements Runnable {
                     + "\r\n";
             headers += "\r\n";
         }
+        Log.e("sachin- ", headers);
 
         InputStream data = null;
         try {
@@ -263,23 +280,20 @@ public class LocalFileStreamingServer implements Runnable {
                 if (supportPlayWhileDownloading) {
                     // Check if data is ready
                     while (!VideoDownloader.isDataReady()) {
-                        if (VideoDownloader.dataStatus == VideoDownloader.DATA_READY) {
-                            Log.e(TAG, "error in reading bytess**********(Data ready)");
-                            break;
-                        } else if (VideoDownloader.dataStatus == VideoDownloader.DATA_CONSUMED) {
-                            Log.e(TAG, "error in reading bytess**********(All Data consumed)");
+                        if (VideoDownloader.dataStatus == VideoDownloader.DATA_CONSUMED) {
+                            Log.e(TAG, "(All Data consumed)");
                             break;
                         } else if (VideoDownloader.dataStatus == VideoDownloader.DATA_NOT_READY) {
-                            Log.e(TAG, "error in reading bytess**********(Data not ready)");
+                            Log.e(TAG, "(Data not ready)");
                         } else if (VideoDownloader.dataStatus == VideoDownloader.DATA_NOT_AVAILABLE) {
-                            Log.e(TAG, "error in reading bytess**********(Data not available)");
+                            Log.e(TAG, "(Data not available)");
                         }
                         // wait for a second if data is not ready
                         synchronized (this) {
                             Thread.sleep(1000);
                         }
                     }
-                    Log.e(TAG, "error in reading bytess**********(Data ready)");
+                    Log.e(TAG, "(Data ready)");
                 } else {
                     Log.d("sachin", "supportPlayWhileDownloading false");
                 }
@@ -305,10 +319,7 @@ public class LocalFileStreamingServer implements Runnable {
 
                 SharedPreferences sharedpreferences = context.getSharedPreferences("FilePref", Context.MODE_PRIVATE);
                 int download_status = sharedpreferences.getInt("download_status", -1);
-                Log.e("shared test", sharedpreferences.getInt("download_status", -1) + "");
-
                 if (download_status != 1) {
-                    Log.e("shared LocalFile", "not downloaded");
                     if (supportPlayWhileDownloading)
                         VideoDownloader.consumedb += cbRead;
                 }
@@ -504,7 +515,7 @@ public class LocalFileStreamingServer implements Runnable {
             if (!ignoreSimulation) {
                 return -1;
             }
-            return contentLength;
+            return movieResource.length();
         }
 
         private void getInputStream() {
@@ -520,5 +531,9 @@ public class LocalFileStreamingServer implements Runnable {
                     + " and content length is: " + contentLength);
         }
 
+    }
+    public interface MediaPlayerCallBacks{
+        public void pauseVideo();
+        public void playVideo();
     }
 }

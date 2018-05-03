@@ -2,11 +2,13 @@ package com.example.cub05.videosamplecustom;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.media.MediaPlayer;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.MediaController;
+import android.widget.Toast;
 import android.widget.VideoView;
 
 import java.io.File;
@@ -25,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
 
         SharedPreferences pref = getApplicationContext().getSharedPreferences("FilePref", 0); // 0 - for private mode
         SharedPreferences.Editor editor = pref.edit();
+        editor.putLong("file_length", -1);
         editor.putInt("download_status", 0);
         editor.apply();
 
@@ -46,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
 
     private VideoDownloadAndPlayService videoService;
 
-    private void startServer(String filePath, final File file) {
+    private void startServer(final String filePath, final File file) {
         videoService = VideoDownloadAndPlayService.startServer(MainActivity.this,
                 "http://192.168.100.13:8080/content/579953aca6f92bb52a5c14270eee7015/images/Triumph Bonneville T100 - Road Test Review - ZigWheels_5a82825d00d03.mp4", filePath + "/video1.mp4", "127.0.0.1", file, new VideoDownloadAndPlayService.VideoStreamInterface() {
                     @Override
@@ -59,7 +62,22 @@ public class MainActivity extends AppCompatActivity {
                         videoView.setVideoPath(videoStreamUrl);
                         videoView.start();
                         videoView.requestFocus();
-//                Log.d("sachin", file.toString());
+
+                        videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                            @Override
+                            public void onPrepared(MediaPlayer mp) {
+                                SharedPreferences sharedpreferences = getApplicationContext().getSharedPreferences("FilePref", Context.MODE_PRIVATE);
+                                long fileLength = sharedpreferences.getLong("file_length", -1);
+                                int fileDuration = videoView.getDuration();
+
+                                long fileSizePerSec = fileLength / (fileDuration / 1000);
+                                Log.e("test", "fileLenth: " + fileLength + " fileduration : " + fileDuration + " filesizepersec : " + fileSizePerSec);
+                            }
+                        });
+
+
+
+
                     }
                 });
     }
