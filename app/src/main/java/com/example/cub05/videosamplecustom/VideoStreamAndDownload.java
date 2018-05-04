@@ -42,9 +42,9 @@ public class VideoStreamAndDownload implements LocalFileStreamingServer.LocalFil
 
 
         if (file.exists()) {
-            startServer(activity, videoUrl, filePath+"/video1.mp4", "127.0.0.1", file);
+            startServer(activity, videoUrl, filePath + "/video1.mp4", "127.0.0.1", file);
         } else {
-            startServer(activity, videoUrl, filePath+"/video1.mp4", "127.0.0.1", null);
+            startServer(activity, videoUrl, filePath + "/video1.mp4", "127.0.0.1", null);
         }
 
 
@@ -104,8 +104,8 @@ public class VideoStreamAndDownload implements LocalFileStreamingServer.LocalFil
 
         if (file == null) {
             Log.d("sachin", "file null");
-          //  new VideoDownloader(activity).execute(videoUrl, pathToSaveVideo, "0");
-            server = new LocalFileStreamingServer(new File(pathToSaveVideo), activity, VideoStreamAndDownload.this,videoUrl,pathToSaveVideo,"0");
+            //  new VideoDownloader(activity).execute(videoUrl, pathToSaveVideo, "0");
+            server = new LocalFileStreamingServer(new File(pathToSaveVideo), activity, VideoStreamAndDownload.this, videoUrl, pathToSaveVideo, "0");
             server.setSupportPlayWhileDownloading(true);
 //        } else if (download_status == 1) {
 //            server = new LocalFileStreamingServer(file, activity, VideoStreamAndDownload.this);
@@ -113,8 +113,8 @@ public class VideoStreamAndDownload implements LocalFileStreamingServer.LocalFil
         } else {
             Log.d("sachin", "file not null");
             Log.d("sachin", "file size " + file.length());
-           // new VideoDownloader(activity).execute(videoUrl, pathToSaveVideo, String.valueOf(file.length()));
-            server = new LocalFileStreamingServer(file, activity, VideoStreamAndDownload.this,videoUrl,pathToSaveVideo, String.valueOf(file.length()));
+            // new VideoDownloader(activity).execute(videoUrl, pathToSaveVideo, String.valueOf(file.length()));
+            server = new LocalFileStreamingServer(file, activity, VideoStreamAndDownload.this, videoUrl, pathToSaveVideo, String.valueOf(file.length()));
             server.setSupportPlayWhileDownloading(true);
         }
 
@@ -156,25 +156,36 @@ public class VideoStreamAndDownload implements LocalFileStreamingServer.LocalFil
 
     @Override
     public void pauseVideo() {
-        activity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Log.e("sachin", "paused");
-                videoView.pause();
-                stopPosition = videoView.getCurrentPosition();
-            }
-        });
+//        activity.runOnUiThread(new Runnable() {
+//            @Override
+//            public void run() {
+        Log.e("sachin", "paused");
+        videoView.pause();
+        stopPosition = videoView.getCurrentPosition();
+//            }
+//        });
     }
 
     @Override
     public void playVideo() {
-        activity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Log.e("sachin", "resumed");
-                videoView.seekTo(stopPosition);
-                videoView.start();
-            }
-        });
+//        activity.runOnUiThread(new Runnable() {
+//            @Override
+//            public void run() {
+        Log.e("sachin", "resumed");
+        videoView.seekTo(stopPosition);
+        videoView.start();
+//            }
+//        });
+    }
+
+
+    public void saveInstanceState() {
+        long currentPosition = videoView.getCurrentPosition();
+
+
+    }
+
+    public void restoreInstanceState() {
+
     }
 }

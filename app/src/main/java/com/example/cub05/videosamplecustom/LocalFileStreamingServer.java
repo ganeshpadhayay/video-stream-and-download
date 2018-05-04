@@ -308,18 +308,22 @@ public class LocalFileStreamingServer implements Runnable, VideoDownloader.Video
                     Log.d("sachin", "supportPlayWhileDownloading false");
                 }
 
+
                 int cbRead = data.read(buff, 0, buff.length);
                 if (cbRead == -1) {
-                    Log.e(TAG,
-                            "ready bytes are -1 and this is simulate streaming, close the ips and create another  ");
-                    data.close();
-                    data = dataSource.createInputStream();
-                    cbRead = data.read(buff, 0, buff.length);
-                    if (cbRead == -1) {
-                        Log.e(TAG, "error in reading bytess**********");
-                        throw new IOException(
-                                "Error re-opening data source for looping.");
+                    synchronized (this) {
+                        Thread.sleep(1000);
                     }
+                    cbRead = data.read(buff, 0, buff.length);
+                    Log.e(TAG, "ready bytes are -1 and this is simulate streaming, close the ips and create another  ");
+//                    data.close();
+//                    data = dataSource.createInputStream();
+//                    cbRead = data.read(buff, 0, buff.length);
+//                    if (cbRead == -1) {
+//                        Log.e(TAG, "error in reading bytess**********");
+//                        throw new IOException(
+//                                "Error re-opening data source for looping.");
+//                    }
                 }
                 client.getOutputStream().write(buff, 0, cbRead);
                 client.getOutputStream().flush();

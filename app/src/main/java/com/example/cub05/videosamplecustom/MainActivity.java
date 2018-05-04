@@ -3,6 +3,7 @@ package com.example.cub05.videosamplecustom;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.media.MediaPlayer;
+import android.os.PersistableBundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -31,7 +32,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
 
-
         videoView = (VideoView) findViewById(R.id.videoView);
         mediaController = new MediaController(this);
         mediaController.setAnchorView(videoView);
@@ -41,10 +41,10 @@ public class MainActivity extends AppCompatActivity {
         String filePath = directory.getAbsolutePath();
         File file = new File(directory, "video1.mp4");
 
-        String videoUrl="http://192.168.100.13:8080/content/579953aca6f92bb52a5c14270eee7015/images/Triumph Bonneville T100 - Road Test Review - ZigWheels_5a82825d00d03.mp4";
+        String videoUrl = "http://192.168.100.13:8080/content/579953aca6f92bb52a5c14270eee7015/images/Triumph Bonneville T100 - Road Test Review - ZigWheels_5a82825d00d03.mp4";
 
-        videoStreamAndDownload=new VideoStreamAndDownload(mediaController,videoView,MainActivity.this);
-        videoStreamAndDownload.onCreate(file,filePath,videoUrl);
+        videoStreamAndDownload = new VideoStreamAndDownload(mediaController, videoView, MainActivity.this);
+        videoStreamAndDownload.onCreate(file, filePath, videoUrl);
 
 
 //
@@ -58,8 +58,20 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        videoStreamAndDownload.restoreInstanceState();
+    }
 
-//    private void startServer(final String filePath, final File file) {
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        videoStreamAndDownload.saveInstanceState();
+    }
+
+
+    //    private void startServer(final String filePath, final File file) {
 //        videoService.startServer(MainActivity.this,
 //                "http://192.168.100.13:8080/content/579953aca6f92bb52a5c14270eee7015/images/Triumph Bonneville T100 - Road Test Review - ZigWheels_5a82825d00d03.mp4", filePath + "/video1.mp4", "127.0.0.1", file, new VideoDownloadAndPlayService.VideoStreamInterface() {
 //                    @Override
