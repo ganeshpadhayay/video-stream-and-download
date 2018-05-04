@@ -122,6 +122,4 @@ public class MainActivity extends AppCompatActivity {
 //        if (videoService != null)
 //            videoService.stop();
     }
-
-
 }
