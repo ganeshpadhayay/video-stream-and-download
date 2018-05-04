@@ -5,7 +5,6 @@ package com.example.cub05.videosamplecustom;
  */
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -331,15 +330,12 @@ public class LocalFileStreamingServer implements Runnable, VideoDownloader.Video
                 cbSentThisBatch += cbRead;
 
 
-                SharedPreferences sharedpreferences = context.getSharedPreferences("FilePref", Context.MODE_PRIVATE);
-                int download_status = sharedpreferences.getInt("download_status", -1);
-                if (download_status != 1) {
-                    if (supportPlayWhileDownloading) {
-                        int consumed = videoDownloader.getConsumedb();
-                        consumed += cbRead;
-                        videoDownloader.setConsumedb(consumed);
-                    }
+                if (supportPlayWhileDownloading) {
+                    int consumed = videoDownloader.getConsumedb();
+                    consumed += cbRead;
+                    videoDownloader.setConsumedb(consumed);
                 }
+
 
             }
             Log.e(TAG, "cbSentThisBatch: " + cbSentThisBatch);

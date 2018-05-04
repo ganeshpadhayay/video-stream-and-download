@@ -1,8 +1,6 @@
 package com.example.cub05.videosamplecustom;
 
 import android.app.Activity;
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.util.Log;
 import android.widget.MediaController;
@@ -34,12 +32,6 @@ public class VideoStreamAndDownload implements LocalFileStreamingServer.LocalFil
     }
 
     public void onCreate(File file, String filePath, String videoUrl) {
-        SharedPreferences pref = activity.getSharedPreferences("FilePref", 0); // 0 - for private mode
-        SharedPreferences.Editor editor = pref.edit();
-        editor.putLong("file_length", -1);
-        editor.putInt("download_status", 0);
-        editor.apply();
-
 
         if (file.exists()) {
             startServer(activity, videoUrl, filePath + "/video1.mp4", "127.0.0.1", file);
@@ -97,10 +89,6 @@ public class VideoStreamAndDownload implements LocalFileStreamingServer.LocalFil
 
     public void startServer(final Activity activity, String videoUrl, String pathToSaveVideo, final String ipOfServer, File file) {
 
-        SharedPreferences sharedpreferences = activity.getSharedPreferences("FilePref", Context.MODE_PRIVATE);
-        int download_status = sharedpreferences.getInt("download_status", -1);
-        Log.e("shared", download_status + "");
-
 
         if (file == null) {
             Log.d("sachin", "file null");
@@ -138,12 +126,6 @@ public class VideoStreamAndDownload implements LocalFileStreamingServer.LocalFil
                         videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                             @Override
                             public void onPrepared(MediaPlayer mp) {
-                                SharedPreferences sharedpreferences = activity.getSharedPreferences("FilePref", Context.MODE_PRIVATE);
-                                long fileLength = sharedpreferences.getLong("file_length", -1);
-                                int fileDuration = videoView.getDuration();
-
-                                long fileSizePerSec = fileLength / (fileDuration / 1000);
-                                Log.e("test", "fileLenth: " + fileLength + " fileDuration : " + fileDuration + " fileSizePerSec : " + fileSizePerSec);
                             }
                         });
                     }

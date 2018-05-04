@@ -1,12 +1,10 @@
 package com.example.cub05.videosamplecustom;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.util.Log;
 
 import java.io.BufferedInputStream;
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -26,12 +24,9 @@ public class VideoDownloader extends AsyncTask<String, Integer, Void> {
     private VideoDownloaderCallbacks videoDownloaderCallbacks;
 
 
-    SharedPreferences sharedpreferences;
-
-    public VideoDownloader(Context context,VideoDownloaderCallbacks videoDownloaderCallbacks) {
+    public VideoDownloader(Context context, VideoDownloaderCallbacks videoDownloaderCallbacks) {
         this.context = context;
-        this.videoDownloaderCallbacks=videoDownloaderCallbacks;
-        sharedpreferences = context.getSharedPreferences("FilePref", Context.MODE_PRIVATE);
+        this.videoDownloaderCallbacks = videoDownloaderCallbacks;
 
     }
 
@@ -91,10 +86,7 @@ public class VideoDownloader extends AsyncTask<String, Integer, Void> {
                 Log.e("response code- ", " " + connection.getResponseCode());
 
                 fileLength = connection.getContentLength();
-                sharedpreferences.edit().putLong("file_length", fileLength).apply();
 
-                Log.e("file length-", "" + fileLength);
-                Log.e("file length local -", "" + fileSizeInLocalStorage);
 
                 if (connection.getResponseCode() == 416) {
                     readb = (int) fileSizeInLocalStorage;
@@ -136,10 +128,6 @@ public class VideoDownloader extends AsyncTask<String, Integer, Void> {
     protected void onPostExecute(Void aVoid) {
         super.onPostExecute(aVoid);
         videoDownloaderCallbacks.onVideoDownloaded();
-        sharedpreferences.edit().putInt("download_status", 1).apply();
-        Log.e("shared VDownldr onPost", sharedpreferences.getInt("download_status", -1) + "");
-        Log.w("download", "Done");
-
     }
 
     public int getDATA_READY() {
@@ -190,7 +178,7 @@ public class VideoDownloader extends AsyncTask<String, Integer, Void> {
         this.fileLength = fileLength;
     }
 
-    public interface VideoDownloaderCallbacks{
+    public interface VideoDownloaderCallbacks {
         public void onVideoDownloaded();
     }
 }
