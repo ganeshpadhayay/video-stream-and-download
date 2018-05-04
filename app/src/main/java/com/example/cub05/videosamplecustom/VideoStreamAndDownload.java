@@ -126,6 +126,12 @@ public class VideoStreamAndDownload implements LocalFileStreamingServer.LocalFil
                         videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                             @Override
                             public void onPrepared(MediaPlayer mp) {
+                                mp.setOnSeekCompleteListener(new MediaPlayer.OnSeekCompleteListener() {
+                                    @Override
+                                    public void onSeekComplete(MediaPlayer mp) {
+                                        videoView.start();
+                                    }
+                                });
                             }
                         });
                     }
@@ -155,7 +161,17 @@ public class VideoStreamAndDownload implements LocalFileStreamingServer.LocalFil
 //            public void run() {
         Log.e("sachin", "resumed");
         videoView.seekTo(stopPosition);
-        videoView.start();
+//        videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+//            @Override
+//            public void onPrepared(MediaPlayer mp) {
+//                mp.setOnSeekCompleteListener(new MediaPlayer.OnSeekCompleteListener() {
+//                    @Override
+//                    public void onSeekComplete(MediaPlayer mp) {
+//                        videoView.start();
+//                    }
+//                });
+//            }
+//        });
 //            }
 //        });
     }
