@@ -30,7 +30,7 @@ import java.util.StringTokenizer;
  * A single-connection HTTP server that will respond to requests for files and
  * pull them from the application's SD card.
  */
-public class LocalFileStreamingServer implements Runnable {
+public class LocalFileStreamingServer implements Runnable, VideoDownloader.VideoDownloaderCallbacks {
     private static final String TAG = LocalFileStreamingServer.class.getName();
     private int port = 0;
     private boolean isRunning = false;
@@ -40,16 +40,22 @@ public class LocalFileStreamingServer implements Runnable {
     private boolean seekRequest;
     private File mMovieFile;
     private Context context;
-    private MediaPlayerCallBacks mediaPlayerCallBacks;
+    private LocalFileStreamingServerCallBacks localFileStreamingServerCallBacks;
 
     private boolean supportPlayWhileDownloading = false;
+
+    private VideoDownloader videoDownloader;
 
     /**
      * This server accepts HTTP request and returns files from device.
      */
-    public LocalFileStreamingServer(File file, Context context) {
+    public LocalFileStreamingServer(File file, Context context, LocalFileStreamingServerCallBacks localFileStreamingServerCallBacks, String videoUrl, String pathToSaveVideo, String fileLength) {
+        this.videoDownloader = new VideoDownloader(context, LocalFileStreamingServer.this);
+        videoDownloader.execute(videoUrl, pathToSaveVideo, fileLength);
+        this.localFileStreamingServerCallBacks = localFileStreamingServerCallBacks;
         mMovieFile = file;
         this.context = context;
+
     }
 
     /**
@@ -231,19 +237,23 @@ public class LocalFileStreamingServer implements Runnable {
         Log.e("sachin", "is seek request: " + seekRequest);
         if (seekRequest) {// It is a seek or skip request if there's a Range
             // header
+            Log.e("sachin", "in seekRequest if condition");
             if (cbSkip > dataSource.getContentLength(true)) {
-                while (cbSkip+cbSkip*.05 > VideoDownloader.readb) {
+                while (cbSkip > videoDownloader.getReadb()) {
+                    localFileStreamingServerCallBacks.pauseVideo();
                     Log.e("sachin ", cbSkip + " cbSkip");
-                    Log.e("sachin ", VideoDownloader.readb + " readDb");
-                    synchronized (this) {
-                        try {
-                            Log.e("sachin", "thread sleeping");
-                            Thread.sleep(1000);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
+                    Log.e("sachin ", videoDownloader.getReadb() + " readDb");
+//                    synchronized (this) {
+//                        try {
+//                            Log.e("sachin", "thread sleeping");
+//                            Thread.sleep(1000);
+//                        } catch (InterruptedException e) {
+//                            e.printStackTrace();
+//                        }
+//                    }
                 }
+                Log.e("sachin", "before play video");
+                localFileStreamingServerCallBacks.playVideo();
             }
 
             headers += "HTTP/1.1 206 Partial Content\r\n";
@@ -279,13 +289,13 @@ public class LocalFileStreamingServer implements Runnable {
             while (isRunning) {
                 if (supportPlayWhileDownloading) {
                     // Check if data is ready
-                    while (!VideoDownloader.isDataReady()) {
-                        if (VideoDownloader.dataStatus == VideoDownloader.DATA_CONSUMED) {
+                    while (!videoDownloader.isDataReady()) {
+                        if (videoDownloader.getDataStatus() == videoDownloader.getDATA_CONSUMED()) {
                             Log.e(TAG, "(All Data consumed)");
                             break;
-                        } else if (VideoDownloader.dataStatus == VideoDownloader.DATA_NOT_READY) {
+                        } else if (videoDownloader.getDataStatus() == videoDownloader.getDATA_NOT_READY()) {
                             Log.e(TAG, "(Data not ready)");
-                        } else if (VideoDownloader.dataStatus == VideoDownloader.DATA_NOT_AVAILABLE) {
+                        } else if (videoDownloader.getDataStatus() == videoDownloader.getDATA_NOT_AVAILABLE()) {
                             Log.e(TAG, "(Data not available)");
                         }
                         // wait for a second if data is not ready
@@ -301,7 +311,7 @@ public class LocalFileStreamingServer implements Runnable {
                 int cbRead = data.read(buff, 0, buff.length);
                 if (cbRead == -1) {
                     Log.e(TAG,
-                            "readybytes are -1 and this is simulate streaming, close the ips and create another  ");
+                            "ready bytes are -1 and this is simulate streaming, close the ips and create another  ");
                     data.close();
                     data = dataSource.createInputStream();
                     cbRead = data.read(buff, 0, buff.length);
@@ -320,8 +330,11 @@ public class LocalFileStreamingServer implements Runnable {
                 SharedPreferences sharedpreferences = context.getSharedPreferences("FilePref", Context.MODE_PRIVATE);
                 int download_status = sharedpreferences.getInt("download_status", -1);
                 if (download_status != 1) {
-                    if (supportPlayWhileDownloading)
-                        VideoDownloader.consumedb += cbRead;
+                    if (supportPlayWhileDownloading) {
+                        int consumed = videoDownloader.getConsumedb();
+                        consumed += cbRead;
+                        videoDownloader.setConsumedb(consumed);
+                    }
                 }
 
             }
@@ -461,6 +474,11 @@ public class LocalFileStreamingServer implements Runnable {
         this.supportPlayWhileDownloading = supportPlayWhileDownloading;
     }
 
+    @Override
+    public void onVideoDownloaded() {
+        supportPlayWhileDownloading = false;
+    }
+
     /**
      * provides meta-data and access to a stream for resources on SD card.
      */
@@ -532,8 +550,10 @@ public class LocalFileStreamingServer implements Runnable {
         }
 
     }
-    public interface MediaPlayerCallBacks{
+
+    public interface LocalFileStreamingServerCallBacks {
         public void pauseVideo();
+
         public void playVideo();
     }
 }

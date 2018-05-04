@@ -18,23 +18,26 @@ import java.net.URL;
  */
 
 public class VideoDownloader extends AsyncTask<String, Integer, Void> {
-    public static final int DATA_READY = 1;
-    public static final int DATA_NOT_READY = 2;
-    public static final int DATA_CONSUMED = 3;
-    public static final int DATA_NOT_AVAILABLE = 4;
+    public final int DATA_READY = 1;
+    public final int DATA_NOT_READY = 2;
+    public final int DATA_NOT_AVAILABLE = 4;
+    public final int DATA_CONSUMED = 3;
     private Context context;
+    private VideoDownloaderCallbacks videoDownloaderCallbacks;
 
 
     SharedPreferences sharedpreferences;
 
-    public VideoDownloader(Context context) {
+    public VideoDownloader(Context context,VideoDownloaderCallbacks videoDownloaderCallbacks) {
         this.context = context;
+        this.videoDownloaderCallbacks=videoDownloaderCallbacks;
         sharedpreferences = context.getSharedPreferences("FilePref", Context.MODE_PRIVATE);
+
     }
 
-    public static int dataStatus = -1;
+    public int dataStatus = -1;
 
-    public static boolean isDataReady() {
+    public boolean isDataReady() {
         dataStatus = -1;
         boolean res = false;
         if (fileLength == readb) {
@@ -56,17 +59,17 @@ public class VideoDownloader extends AsyncTask<String, Integer, Void> {
     /**
      * Keeps track of read bytes while serving to video player client from server
      */
-    public static int consumedb = 0;
+    public int consumedb = 0;
 
     /**
      * Keeps track of all bytes read on each while iteration
      */
-    public static int readb = 0;
+    public int readb = 0;
 
     /**
      * Length of file being downloaded.
      */
-    static int fileLength = -1;
+    int fileLength = -1;
 
     @Override
     protected Void doInBackground(String... params) {
@@ -108,7 +111,7 @@ public class VideoDownloader extends AsyncTask<String, Integer, Void> {
                         out.flush();
                         readBytes += len;
                         readb += len;
-                      //  Log.w("download", (readb) + "b of " + (fileLength) + "b");
+                          Log.w("download", (readb) + "b of " + (fileLength) + "b");
                     }
                 }
             } catch (MalformedURLException e) {
@@ -132,9 +135,62 @@ public class VideoDownloader extends AsyncTask<String, Integer, Void> {
     @Override
     protected void onPostExecute(Void aVoid) {
         super.onPostExecute(aVoid);
+        videoDownloaderCallbacks.onVideoDownloaded();
         sharedpreferences.edit().putInt("download_status", 1).apply();
         Log.e("shared VDownldr onPost", sharedpreferences.getInt("download_status", -1) + "");
         Log.w("download", "Done");
 
+    }
+
+    public int getDATA_READY() {
+        return DATA_READY;
+    }
+
+    public int getDATA_NOT_READY() {
+        return DATA_NOT_READY;
+    }
+
+    public int getDATA_NOT_AVAILABLE() {
+        return DATA_NOT_AVAILABLE;
+    }
+
+    public int getDATA_CONSUMED() {
+        return DATA_CONSUMED;
+    }
+
+    public int getDataStatus() {
+        return dataStatus;
+    }
+
+    public void setDataStatus(int dataStatus) {
+        this.dataStatus = dataStatus;
+    }
+
+    public int getConsumedb() {
+        return consumedb;
+    }
+
+    public void setConsumedb(int consumedb) {
+        this.consumedb = consumedb;
+    }
+
+    public int getReadb() {
+        return readb;
+    }
+
+    public void setReadb(int readb) {
+        this.readb = readb;
+    }
+
+    public int getFileLength() {
+        return fileLength;
+    }
+
+    public void setFileLength(int fileLength) {
+        this.fileLength = fileLength;
+    }
+
+    public interface VideoDownloaderCallbacks{
+        public void onVideoDownloaded();
     }
 }
