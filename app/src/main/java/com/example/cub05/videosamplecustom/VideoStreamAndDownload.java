@@ -2,6 +2,7 @@ package com.example.cub05.videosamplecustom;
 
 import android.app.Activity;
 import android.media.MediaPlayer;
+import android.os.Bundle;
 import android.util.Log;
 import android.widget.MediaController;
 import android.widget.VideoView;
@@ -18,9 +19,12 @@ public class VideoStreamAndDownload implements LocalFileStreamingServer.LocalFil
     private VideoView videoView;
     private MediaController mediaController;
     private int stopPosition;
+    private ProgressBarCallbacks progressBarCallbacks;
 
     private LocalFileStreamingServer server;
 
+    private boolean playState = false;
+    private int playTime = 0;
 
     private MainActivity activity;
 
@@ -29,6 +33,7 @@ public class VideoStreamAndDownload implements LocalFileStreamingServer.LocalFil
         this.mediaController = mediaController;
         this.videoView = videoView;
         this.activity = mainActivity;
+        this.progressBarCallbacks = mainActivity;
     }
 
     public void onCreate(File file, String filePath, String videoUrl) {
@@ -129,7 +134,10 @@ public class VideoStreamAndDownload implements LocalFileStreamingServer.LocalFil
                                 mp.setOnSeekCompleteListener(new MediaPlayer.OnSeekCompleteListener() {
                                     @Override
                                     public void onSeekComplete(MediaPlayer mp) {
-                                        videoView.start();
+                                        if (playState) {
+                                            videoView.start();
+                                        }
+
                                     }
                                 });
                             }
@@ -144,46 +152,39 @@ public class VideoStreamAndDownload implements LocalFileStreamingServer.LocalFil
 
     @Override
     public void pauseVideo() {
-//        activity.runOnUiThread(new Runnable() {
-//            @Override
-//            public void run() {
         Log.e("sachin", "paused");
         videoView.pause();
+        progressBarCallbacks.startProgressbar();
         stopPosition = videoView.getCurrentPosition();
-//            }
-//        });
     }
 
     @Override
     public void playVideo() {
-//        activity.runOnUiThread(new Runnable() {
-//            @Override
-//            public void run() {
         Log.e("sachin", "resumed");
+        playState = true;
+        progressBarCallbacks.stopProgressbar();
         videoView.seekTo(stopPosition);
-//        videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-//            @Override
-//            public void onPrepared(MediaPlayer mp) {
-//                mp.setOnSeekCompleteListener(new MediaPlayer.OnSeekCompleteListener() {
-//                    @Override
-//                    public void onSeekComplete(MediaPlayer mp) {
-//                        videoView.start();
-//                    }
-//                });
-//            }
-//        });
-//            }
-//        });
     }
 
 
-    public void saveInstanceState() {
-        long currentPosition = videoView.getCurrentPosition();
-
-
+    public void saveInstanceState(Bundle outState) {
+        Log.e("test", "play state is : " + videoView.isPlaying() + " play time is : " + videoView.getCurrentPosition());
+        outState.putBoolean("play_state", videoView.isPlaying());
+        outState.putInt("play_time", videoView.getCurrentPosition());
     }
 
-    public void restoreInstanceState() {
+    public void restoreInstanceState(Bundle savedInstanceState) {
+        playState = savedInstanceState.getBoolean("play_state");
+        playTime = savedInstanceState.getInt("play_time");
+        Log.e("test", "play state is : " + playState + " play time is : " + playTime);
+        videoView.seekTo(playTime);
+    }
+
+
+    public interface ProgressBarCallbacks {
+        void stopProgressbar();
+
+        void startProgressbar();
 
     }
 }

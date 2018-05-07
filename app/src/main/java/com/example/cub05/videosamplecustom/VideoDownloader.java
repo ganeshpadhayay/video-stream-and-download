@@ -103,7 +103,7 @@ public class VideoDownloader extends AsyncTask<String, Integer, Void> {
                         out.flush();
                         readBytes += len;
                         readb += len;
-//                          Log.w("download", (readb) + "b of " + (fileLength) + "b");
+                          Log.w("download", (readb) + "b of " + (fileLength) + "b");
                     }
                 }
             } catch (MalformedURLException e) {
