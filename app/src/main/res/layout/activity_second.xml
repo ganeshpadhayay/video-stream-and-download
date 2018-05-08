@@ -20,10 +20,4 @@
         android:layout_gravity="center"
         android:visibility="gone" />
 
-    <Button
-        android:id="@+id/go_to_second_video"
-        android:layout_width="match_parent"
-        android:text="Go to Video 2"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end" />
 </FrameLayout>

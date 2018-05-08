@@ -26,22 +26,22 @@ public class VideoStreamAndDownload implements LocalFileStreamingServer.LocalFil
     private boolean playState = false;
     private int playTime = 0;
 
-    private MainActivity activity;
+    private Activity activity;
 
 
-    public VideoStreamAndDownload(MediaController mediaController, VideoView videoView, MainActivity mainActivity) {
+    public VideoStreamAndDownload(MediaController mediaController, VideoView videoView, Activity activity) {
         this.mediaController = mediaController;
         this.videoView = videoView;
-        this.activity = mainActivity;
-        this.progressBarCallbacks = mainActivity;
+        this.activity = activity;
+        this.progressBarCallbacks = (ProgressBarCallbacks) activity;
     }
 
-    public void onCreate(File file, String filePath, String videoUrl) {
+    public void onCreate(File file, String pathToSaveVideo, String videoUrl) {
 
         if (file.exists()) {
-            startServer(activity, videoUrl, filePath + "/video1.mp4", "127.0.0.1", file);
+            startServer(activity, videoUrl, pathToSaveVideo, "127.0.0.1", file);
         } else {
-            startServer(activity, videoUrl, filePath + "/video1.mp4", "127.0.0.1", null);
+            startServer(activity, videoUrl, pathToSaveVideo, "127.0.0.1", null);
         }
 
 
