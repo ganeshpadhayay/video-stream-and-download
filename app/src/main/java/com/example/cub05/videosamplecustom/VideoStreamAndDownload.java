@@ -4,7 +4,9 @@ import android.app.Activity;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.MediaController;
+import android.widget.Toast;
 import android.widget.VideoView;
 
 import java.io.File;
@@ -142,6 +144,17 @@ public class VideoStreamAndDownload implements LocalFileStreamingServer.LocalFil
                                 });
                             }
                         });
+                        videoView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+                            @Override
+                            public void onViewAttachedToWindow(View v) {
+                                Toast.makeText(activity, "onViewAttachedToWindow", Toast.LENGTH_SHORT).show();
+                            }
+
+                            @Override
+                            public void onViewDetachedFromWindow(View v) {
+                                Toast.makeText(activity, "onViewDetachedFromWindow", Toast.LENGTH_SHORT).show();
+                            }
+                        });
                     }
                 });
             }
@@ -166,6 +179,10 @@ public class VideoStreamAndDownload implements LocalFileStreamingServer.LocalFil
         videoView.seekTo(stopPosition);
     }
 
+    public void stopServer() {
+        server.stop();
+        server.stopVideoDownloading();
+    }
 
     public void saveInstanceState(Bundle outState) {
         Log.e("test", "play state is : " + videoView.isPlaying() + " play time is : " + videoView.getCurrentPosition());

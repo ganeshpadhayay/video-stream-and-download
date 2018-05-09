@@ -49,8 +49,10 @@ public class MainActivity extends Activity implements VideoStreamAndDownload.Pro
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                videoStreamAndDownload.stopServer();
                 Intent intent = new Intent(MainActivity.this, SecondActivity.class);
                 startActivity(intent);
+                finish();
             }
         });
 
@@ -96,4 +98,5 @@ public class MainActivity extends Activity implements VideoStreamAndDownload.Pro
             }
         });
     }
+
 }

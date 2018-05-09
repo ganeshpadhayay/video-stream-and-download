@@ -86,4 +86,12 @@ public class SecondActivity extends Activity implements VideoStreamAndDownload.P
             }
         });
     }
+
+    @Override
+    public void onBackPressed() {
+        videoStreamAndDownload.stopServer();
+        Intent intent = new Intent(SecondActivity.this, MainActivity.class);
+        startActivity(intent);
+        super.onBackPressed();
+    }
 }

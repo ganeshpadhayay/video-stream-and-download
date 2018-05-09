@@ -54,7 +54,10 @@ public class LocalFileStreamingServer implements Runnable, VideoDownloader.Video
         this.localFileStreamingServerCallBacks = localFileStreamingServerCallBacks;
         mMovieFile = file;
         this.context = context;
+    }
 
+    public boolean stopVideoDownloading() {
+        return videoDownloader.cancel(true);
     }
 
     /**
