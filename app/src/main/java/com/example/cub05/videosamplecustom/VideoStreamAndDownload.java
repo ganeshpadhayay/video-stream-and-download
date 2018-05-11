@@ -39,79 +39,17 @@ public class VideoStreamAndDownload implements LocalFileStreamingServer.LocalFil
     }
 
     public void onCreate(File file, String pathToSaveVideo, String videoUrl) {
-
-        if (file.exists()) {
-            startServer(activity, videoUrl, pathToSaveVideo, "127.0.0.1", file);
-        } else {
-            startServer(activity, videoUrl, pathToSaveVideo, "127.0.0.1", null);
-        }
+        startServer(activity, videoUrl, pathToSaveVideo, "127.0.0.1", file);
 
 
     }
-//
-//    private void startServer(final String filePath, final File file) {
-//        videoService.startServer(MainActivity.this,
-//                "http://192.168.100.13:8080/content/579953aca6f92bb52a5c14270eee7015/images/Triumph Bonneville T100 - Road Test Review - ZigWheels_5a82825d00d03.mp4", filePath + "/video1.mp4", "127.0.0.1", file, new VideoDownloadAndPlayService.VideoStreamInterface() {
-//                    @Override
-//                    public void onServerStart(String videoStreamUrl) {
-//                        // use videoStreamUrl to play video through media player
-////                        Log.d("sachin", videoStreamUrl);
-////
-////                        videoView.setMediaController(mediaController);
-////                        videoView.setKeepScreenOn(true);
-////                        videoView.setVideoPath(videoStreamUrl);
-////                        videoView.start();
-////                        videoView.requestFocus();
-////
-////                        videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-////                            @Override
-////                            public void onPrepared(MediaPlayer mp) {
-////                                SharedPreferences sharedpreferences = getApplicationContext().getSharedPreferences("FilePref", Context.MODE_PRIVATE);
-////                                long fileLength = sharedpreferences.getLong("file_length", -1);
-////                                int fileDuration = videoView.getDuration();
-////
-////                                long fileSizePerSec = fileLength / (fileDuration / 1000);
-////                                Log.e("test", "fileLenth: " + fileLength + " fileDuration : " + fileDuration + " fileSizePerSec : " + fileSizePerSec);
-////                            }
-////                        });
-//
-//
-//                    }
-//
-//                    @Override
-//                    public void pauseVideo() {
-//                        Log.e("sachin", "paused");
-//                        videoView.pause();
-//                        stopPosition = videoView.getCurrentPosition();
-//                    }
-//
-//                    @Override
-//                    public void playVideo() {
-//                        Log.e("sachin", "resumed");
-//                        videoView.seekTo(stopPosition);
-//                        videoView.start();
-//                    }
-//                });
-//    }
 
     public void startServer(final Activity activity, String videoUrl, String pathToSaveVideo, final String ipOfServer, File file) {
 
 
-        if (file == null) {
-            Log.d("sachin", "file null");
-            //  new VideoDownloader(activity).execute(videoUrl, pathToSaveVideo, "0");
-            server = new LocalFileStreamingServer(new File(pathToSaveVideo), activity, VideoStreamAndDownload.this, videoUrl, pathToSaveVideo, "0");
-            server.setSupportPlayWhileDownloading(true);
-//        } else if (download_status == 1) {
-//            server = new LocalFileStreamingServer(file, activity, VideoStreamAndDownload.this);
-//            server.setSupportPlayWhileDownloading(false);
-        } else {
-            Log.d("sachin", "file not null");
-            Log.d("sachin", "file size " + file.length());
-            // new VideoDownloader(activity).execute(videoUrl, pathToSaveVideo, String.valueOf(file.length()));
-            server = new LocalFileStreamingServer(file, activity, VideoStreamAndDownload.this, videoUrl, pathToSaveVideo, String.valueOf(file.length()));
-            server.setSupportPlayWhileDownloading(true);
-        }
+        Log.d("sachin", "file size " + file.length());
+        server = new LocalFileStreamingServer(file, activity, VideoStreamAndDownload.this, videoUrl, pathToSaveVideo, String.valueOf(file.length()));
+        server.setSupportPlayWhileDownloading(true);
 
         new Thread(new Runnable() {
             @Override
@@ -122,39 +60,41 @@ public class VideoStreamAndDownload implements LocalFileStreamingServer.LocalFil
                     @Override
                     public void run() {
                         server.start();
-                        Log.d("sachin", server.getFileUrl());
+
+                        Log.d("sachin server url", server.getFileUrl());
 
                         videoView.setMediaController(mediaController);
                         videoView.setKeepScreenOn(true);
                         videoView.setVideoPath(server.getFileUrl());
                         videoView.start();
                         videoView.requestFocus();
-
                         videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                             @Override
                             public void onPrepared(MediaPlayer mp) {
+                                playVideo();
                                 mp.setOnSeekCompleteListener(new MediaPlayer.OnSeekCompleteListener() {
                                     @Override
                                     public void onSeekComplete(MediaPlayer mp) {
-                                        if (playState) {
-                                            videoView.start();
-                                        }
+//                                        if (playState) {
+                                        videoView.start();
+//                                        }
+
 
                                     }
                                 });
                             }
                         });
-                        videoView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
-                            @Override
-                            public void onViewAttachedToWindow(View v) {
-                                Toast.makeText(activity, "onViewAttachedToWindow", Toast.LENGTH_SHORT).show();
-                            }
-
-                            @Override
-                            public void onViewDetachedFromWindow(View v) {
-                                Toast.makeText(activity, "onViewDetachedFromWindow", Toast.LENGTH_SHORT).show();
-                            }
-                        });
+//                        videoView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+//                            @Override
+//                            public void onViewAttachedToWindow(View v) {
+//                                Toast.makeText(activity, "onViewAttachedToWindow", Toast.LENGTH_SHORT).show();
+//                            }
+//
+//                            @Override
+//                            public void onViewDetachedFromWindow(View v) {
+//                                Toast.makeText(activity, "onViewDetachedFromWindow", Toast.LENGTH_SHORT).show();
+//                            }
+//                        });
                     }
                 });
             }
@@ -165,16 +105,20 @@ public class VideoStreamAndDownload implements LocalFileStreamingServer.LocalFil
 
     @Override
     public void pauseVideo() {
-        Log.e("sachin", "paused");
-        videoView.pause();
+//        Log.e("sachin", "paused");
         progressBarCallbacks.startProgressbar();
-        stopPosition = videoView.getCurrentPosition();
+        try {
+            videoView.pause();
+            stopPosition = videoView.getCurrentPosition();
+        } catch (IllegalStateException e) {
+            e.printStackTrace();
+            stopPosition = 0;
+        }
     }
 
     @Override
     public void playVideo() {
         Log.e("sachin", "resumed");
-        playState = true;
         progressBarCallbacks.stopProgressbar();
         videoView.seekTo(stopPosition);
     }

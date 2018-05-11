@@ -74,6 +74,7 @@ public class VideoDownloader extends AsyncTask<String, Integer, Void> {
         BufferedInputStream input = null;
         try {
             final FileOutputStream out = new FileOutputStream(params[1], true);
+            Log.e("sachin ","file created in video downloader");
 
             try {
                 URL url = new URL(params[0]);
@@ -83,11 +84,11 @@ public class VideoDownloader extends AsyncTask<String, Integer, Void> {
                 connection.setRequestProperty("Range", "bytes=" + fileSizeInLocalStorage + "-");
                 connection.connect();
 
-                Log.e("response code- ", " " + connection.getResponseCode());
+                Log.e("server response code- ", " " + connection.getResponseCode());
 
                 fileLength = connection.getContentLength();
 
-
+                readb= (int) fileSizeInLocalStorage;
                 if (connection.getResponseCode() == 416) {
                     readb = (int) fileSizeInLocalStorage;
                     Log.d("sachin", "video is already downloaded");
@@ -103,7 +104,7 @@ public class VideoDownloader extends AsyncTask<String, Integer, Void> {
                         out.flush();
                         readBytes += len;
                         readb += len;
-                          Log.w("download", (readb) + "b of " + (fileLength) + "b");
+                        Log.w("download", (readb) + "b of " + (fileLength) + "b");
                     }
                 }
             } catch (MalformedURLException e) {
@@ -127,6 +128,7 @@ public class VideoDownloader extends AsyncTask<String, Integer, Void> {
     @Override
     protected void onPostExecute(Void aVoid) {
         super.onPostExecute(aVoid);
+        Log.e("sachin","on post execute");
         videoDownloaderCallbacks.onVideoDownloaded();
     }
 

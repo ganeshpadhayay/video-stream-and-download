@@ -11,6 +11,7 @@ import android.widget.ProgressBar;
 import android.widget.VideoView;
 
 import java.io.File;
+import java.io.IOException;
 
 public class SecondActivity extends Activity implements VideoStreamAndDownload.ProgressBarCallbacks {
 
@@ -37,8 +38,13 @@ public class SecondActivity extends Activity implements VideoStreamAndDownload.P
         File directory = getApplicationContext().getDir("xShowroom_Videos", Context.MODE_PRIVATE);
         String filePath = directory.getAbsolutePath();
         File file = new File(directory, "video2.mp4");
+        try {
+            file.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-        String videoUrl = "http://192.168.100.13:8080/content/579953aca6f92bb52a5c14270eee7015/images/code_refractoring_5af1615350f5e.mp4";
+        String videoUrl = "http://dev.xshowroom.in:8080/content/579953aca6f92bb52a5c14270eee7015/images/code_refractoring_5af1615350f5e.mp4";
 
 
         videoStreamAndDownload = new VideoStreamAndDownload(mediaController, videoView, SecondActivity.this);

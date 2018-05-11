@@ -243,16 +243,8 @@ public class LocalFileStreamingServer implements Runnable, VideoDownloader.Video
             if (cbSkip > dataSource.getContentLength(true)) {
                 while (cbSkip > videoDownloader.getReadb()) {
                     localFileStreamingServerCallBacks.pauseVideo();
-                    Log.e("sachin ", cbSkip + " cbSkip");
-                    Log.e("sachin ", videoDownloader.getReadb() + " readDb");
-//                    synchronized (this) {
-//                        try {
-//                            Log.e("sachin", "thread sleeping");
-//                            Thread.sleep(1000);
-//                        } catch (InterruptedException e) {
-//                            e.printStackTrace();
-//                        }
-//                    }
+//                    Log.e("sachin ", cbSkip + " cbSkip");
+//                    Log.e("sachin ", videoDownloader.getReadb() + " readDb");
                 }
                 Log.e("sachin", "before play video");
                 localFileStreamingServerCallBacks.playVideo();
@@ -302,7 +294,7 @@ public class LocalFileStreamingServer implements Runnable, VideoDownloader.Video
                         }
                         // wait for a second if data is not ready
                         synchronized (this) {
-                            Thread.sleep(1000);
+                            Thread.sleep(200);
                         }
                     }
                     Log.e(TAG, "(Data ready)");
@@ -312,21 +304,32 @@ public class LocalFileStreamingServer implements Runnable, VideoDownloader.Video
 
 
                 int cbRead = data.read(buff, 0, buff.length);
-                if (cbRead == -1) {
-                    synchronized (this) {
-                        Thread.sleep(1000);
-                    }
-                    cbRead = data.read(buff, 0, buff.length);
-                    Log.e(TAG, "ready bytes are -1 and this is simulate streaming, close the ips and create another  ");
-//                    data.close();
-//                    data = dataSource.createInputStream();
-//                    cbRead = data.read(buff, 0, buff.length);
-//                    if (cbRead == -1) {
-//                        Log.e(TAG, "error in reading bytess**********");
-//                        throw new IOException(
-//                                "Error re-opening data source for looping.");
+                Log.e("sachin", "cbread -" + cbRead);
+//                if (cbRead == -1) {
+//                    synchronized (this) {
+//                        Thread.sleep(2000);
 //                    }
-                }
+//                    cbRead = data.read(buff, 0, buff.length);
+//
+//                    Log.e(TAG, "ready bytes are -1 and this is simulate streaming, close the ips and create another  ");
+////                    data.close();
+////                    data = dataSource.createInputStream();
+////                    cbRead = data.read(buff, 0, buff.length);
+////                    if (cbRead == -1) {
+////                        Log.e(TAG, "error in reading bytess**********");
+////                        throw new IOException(
+////                                "Error re-opening data source for looping.");
+////                    }
+//                }
+                if (supportPlayWhileDownloading)
+                    while (cbRead == -1) {
+                        synchronized (this) {
+                            Thread.sleep(1000);
+                        }
+                        cbRead = data.read(buff, 0, buff.length);
+                        Log.e(TAG, "ready bytes are -1 and this is simulate streaming, close the ips and create another  ");
+                    }
+
                 client.getOutputStream().write(buff, 0, cbRead);
                 client.getOutputStream().flush();
                 cbSkip += cbRead;

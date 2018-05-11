@@ -13,6 +13,7 @@ import android.widget.ProgressBar;
 import android.widget.VideoView;
 
 import java.io.File;
+import java.io.IOException;
 
 public class MainActivity extends Activity implements VideoStreamAndDownload.ProgressBarCallbacks {
 
@@ -39,12 +40,19 @@ public class MainActivity extends Activity implements VideoStreamAndDownload.Pro
         File directory = getApplicationContext().getDir("xShowroom_Videos", Context.MODE_PRIVATE);
         String filePath = directory.getAbsolutePath();
         File file = new File(directory, "video1.mp4");
+//        try {
+//            boolean fileCreated = file.createNewFile();
+//            Log.e("sachin", "file created -" + fileCreated + " at location" + file.getAbsolutePath());
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
 
-        String videoUrl = "http://192.168.100.13:8080/content/579953aca6f92bb52a5c14270eee7015/images/how_to_make_a_great_developer_5af151f9ef021.mp4";
+//        String videoUrl = "http://192.168.100.13:8080/content/579953aca6f92bb52a5c14270eee7015/images/how_to_make_a_great_developer_5af151f9ef021.mp4";
+        String videoUrl = "http://dev.xshowroom.in:8080/content/579953aca6f92bb52a5c14270eee7015/images/how_to_make_a_great_developer_5af151f9ef021.mp4";
 //        String videoUrl = "http://192.168.100.13:8080/content/579953aca6f92bb52a5c14270eee7015/images/1_5abcbd451923f.mp4";
 
         videoStreamAndDownload = new VideoStreamAndDownload(mediaController, videoView, MainActivity.this);
-        videoStreamAndDownload.onCreate(file, filePath + "/video1.mp4", videoUrl);
+        videoStreamAndDownload.onCreate(file, file.getAbsolutePath(), videoUrl);
 
         button.setOnClickListener(new View.OnClickListener() {
             @Override
