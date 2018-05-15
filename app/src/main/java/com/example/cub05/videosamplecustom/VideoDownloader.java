@@ -15,7 +15,7 @@ import java.net.URL;
  * Created by cub05 on 4/25/2018.
  */
 
-public class VideoDownloader extends AsyncTask<String, Integer, Void> {
+public class VideoDownloader implements Runnable {
     public final int DATA_READY = 1;
     public final int DATA_NOT_READY = 2;
     public final int DATA_NOT_AVAILABLE = 4;
@@ -23,10 +23,17 @@ public class VideoDownloader extends AsyncTask<String, Integer, Void> {
     private Context context;
     private VideoDownloaderCallbacks videoDownloaderCallbacks;
 
+    private String videoFileUrl;
+    private String pathToSaveVideo;
+    private String fileLengthInStorage;
 
-    public VideoDownloader(Context context, VideoDownloaderCallbacks videoDownloaderCallbacks) {
+
+    public VideoDownloader(Context context, VideoDownloaderCallbacks videoDownloaderCallbacks, String videoFileUrl, String pathToSaveVideo, String fileLengthInStorage) {
         this.context = context;
         this.videoDownloaderCallbacks = videoDownloaderCallbacks;
+        this.fileLengthInStorage = fileLengthInStorage;
+        this.videoFileUrl = videoFileUrl;
+        this.pathToSaveVideo = pathToSaveVideo;
 
     }
 
@@ -66,71 +73,71 @@ public class VideoDownloader extends AsyncTask<String, Integer, Void> {
      */
     int fileLength = -1;
 
-    @Override
-    protected Void doInBackground(String... params) {
-
-
-        long fileSizeInLocalStorage = Long.valueOf(params[2]);
-        BufferedInputStream input = null;
-        try {
-            final FileOutputStream out = new FileOutputStream(params[1], true);
-            Log.e("sachin ","file created in video downloader");
-
-            try {
-                URL url = new URL(params[0]);
-
-                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                connection.setRequestMethod("GET");
-                connection.setRequestProperty("Range", "bytes=" + fileSizeInLocalStorage + "-");
-                connection.connect();
-
-                Log.e("server response code- ", " " + connection.getResponseCode());
-
-                fileLength = connection.getContentLength();
-
-                readb= (int) fileSizeInLocalStorage;
-                if (connection.getResponseCode() == 416) {
-                    readb = (int) fileSizeInLocalStorage;
-                    Log.d("sachin", "video is already downloaded");
-                } else {
-                    input = new BufferedInputStream(connection.getInputStream());
-                    byte data[] = new byte[1024 * 50];
-                    long readBytes = 0;
-                    int len;
-                    boolean flag = true;
-
-                    while ((len = input.read(data)) != -1) {
-                        out.write(data, 0, len);
-                        out.flush();
-                        readBytes += len;
-                        readb += len;
-                        Log.w("download", (readb) + "b of " + (fileLength) + "b");
-                    }
-                }
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                if (out != null) {
-                    out.flush();
-                    out.close();
-                }
-                if (input != null)
-                    input.close();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    @Override
-    protected void onPostExecute(Void aVoid) {
-        super.onPostExecute(aVoid);
-        Log.e("sachin","on post execute");
-        videoDownloaderCallbacks.onVideoDownloaded();
-    }
+//    @Override
+//    protected Void doInBackground(String... params) {
+//
+//
+//        long fileSizeInLocalStorage = Long.valueOf(params[2]);
+//        BufferedInputStream input = null;
+//        try {
+//            final FileOutputStream out = new FileOutputStream(params[1], true);
+//            Log.e("sachin ","file created in video downloader");
+//
+//            try {
+//                URL url = new URL(params[0]);
+//
+//                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+//                connection.setRequestMethod("GET");
+//                connection.setRequestProperty("Range", "bytes=" + fileSizeInLocalStorage + "-");
+//                connection.connect();
+//
+//                Log.e("server response code- ", " " + connection.getResponseCode());
+//
+//                fileLength = connection.getContentLength();
+//
+//                readb= (int) fileSizeInLocalStorage;
+//                if (connection.getResponseCode() == 416) {
+//                    readb = (int) fileSizeInLocalStorage;
+//                    Log.d("sachin", "video is already downloaded");
+//                } else {
+//                    input = new BufferedInputStream(connection.getInputStream());
+//                    byte data[] = new byte[1024 * 50];
+//                    long readBytes = 0;
+//                    int len;
+//                    boolean flag = true;
+//
+//                    while ((len = input.read(data)) != -1) {
+//                        out.write(data, 0, len);
+//                        out.flush();
+//                        readBytes += len;
+//                        readb += len;
+//                        Log.w("download", (readb) + "b of " + (fileLength) + "b");
+//                    }
+//                }
+//            } catch (MalformedURLException e) {
+//                e.printStackTrace();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            } finally {
+//                if (out != null) {
+//                    out.flush();
+//                    out.close();
+//                }
+//                if (input != null)
+//                    input.close();
+//            }
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        return null;
+//    }
+//
+//    @Override
+//    protected void onPostExecute(Void aVoid) {
+//        super.onPostExecute(aVoid);
+//        Log.e("sachin","on post execute");
+//        videoDownloaderCallbacks.onVideoDownloaded();
+//    }
 
     public int getDATA_READY() {
         return DATA_READY;
@@ -178,6 +185,70 @@ public class VideoDownloader extends AsyncTask<String, Integer, Void> {
 
     public void setFileLength(int fileLength) {
         this.fileLength = fileLength;
+    }
+
+    @Override
+    public void run() {
+        long fileSizeInLocalStorage = Long.valueOf(fileLengthInStorage);
+        BufferedInputStream input = null;
+        try {
+            final FileOutputStream out = new FileOutputStream(pathToSaveVideo, true);
+            Log.e("sachin ", "file created in video downloader");
+
+            try {
+                URL url = new URL(videoFileUrl);
+
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                connection.setRequestMethod("GET");
+                connection.setRequestProperty("Range", "bytes=" + fileSizeInLocalStorage + "-");
+                connection.connect();
+
+                Log.e("server response code- ", " " + connection.getResponseCode());
+
+                fileLength = connection.getContentLength();
+
+                readb = (int) fileSizeInLocalStorage;
+                if (connection.getResponseCode() == 416) {
+                    readb = (int) fileSizeInLocalStorage;
+                    Log.d("sachin", "video is already downloaded");
+                } else {
+                    input = new BufferedInputStream(connection.getInputStream());
+                    byte data[] = new byte[1024 * 50];
+                    long readBytes = 0;
+                    int len;
+                    boolean flag = true;
+
+                    while ((len = input.read(data)) != -1) {
+                        out.write(data, 0, len);
+                        out.flush();
+                        readBytes += len;
+                        readb += len;
+                        Log.w("download", (readb) + "b of " + (fileLength) + "b");
+                    }
+                }
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (out != null) {
+                    out.flush();
+                    out.close();
+                }
+                if (input != null)
+                    input.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+        videoDownloaderCallbacks.onVideoDownloaded();
+
+    }
+
+    public boolean cancel(boolean b) {
+        return false;
     }
 
     public interface VideoDownloaderCallbacks {

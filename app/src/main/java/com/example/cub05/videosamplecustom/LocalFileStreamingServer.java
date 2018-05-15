@@ -49,8 +49,10 @@ public class LocalFileStreamingServer implements Runnable, VideoDownloader.Video
      * This server accepts HTTP request and returns files from device.
      */
     public LocalFileStreamingServer(File file, Context context, LocalFileStreamingServerCallBacks localFileStreamingServerCallBacks, String videoUrl, String pathToSaveVideo, String fileLength) {
-        this.videoDownloader = new VideoDownloader(context, LocalFileStreamingServer.this);
-        videoDownloader.execute(videoUrl, pathToSaveVideo, fileLength);
+        this.videoDownloader = new VideoDownloader(context, LocalFileStreamingServer.this, videoUrl, pathToSaveVideo, fileLength);
+        Thread thread = new Thread(this.videoDownloader);
+        thread.start();
+//        videoDownloader.execute(videoUrl, pathToSaveVideo, fileLength);
         this.localFileStreamingServerCallBacks = localFileStreamingServerCallBacks;
         mMovieFile = file;
         this.context = context;

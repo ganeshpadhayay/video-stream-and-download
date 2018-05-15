@@ -137,6 +137,7 @@ public class VideoStreamAndDownload implements LocalFileStreamingServer.LocalFil
     public void restoreInstanceState(Bundle savedInstanceState) {
         playState = savedInstanceState.getBoolean("play_state");
         playTime = savedInstanceState.getInt("play_time");
+        stopPosition = playTime;
         Log.e("test", "play state is : " + playState + " play time is : " + playTime);
         videoView.seekTo(playTime);
     }
