@@ -25,10 +25,10 @@ public class VideoDownloader implements Runnable {
 
     private String videoFileUrl;
     private String pathToSaveVideo;
-    private String fileLengthInStorage;
+    private long fileLengthInStorage;
 
 
-    public VideoDownloader(Context context, VideoDownloaderCallbacks videoDownloaderCallbacks, String videoFileUrl, String pathToSaveVideo, String fileLengthInStorage) {
+    public VideoDownloader(Context context, VideoDownloaderCallbacks videoDownloaderCallbacks, String videoFileUrl, String pathToSaveVideo, long fileLengthInStorage) {
         this.context = context;
         this.videoDownloaderCallbacks = videoDownloaderCallbacks;
         this.fileLengthInStorage = fileLengthInStorage;
@@ -48,7 +48,7 @@ public class VideoDownloader implements Runnable {
         } else if (readb > consumedb) {
             dataStatus = DATA_READY;
             res = true;
-        } else if (readb <= consumedb) {
+        } else if ((readb-.01*readb) <= consumedb) {
             dataStatus = DATA_NOT_READY;
             res = false;
         } else if (fileLength == -1) {
@@ -179,17 +179,17 @@ public class VideoDownloader implements Runnable {
         this.readb = readb;
     }
 
-    public int getFileLength() {
-        return fileLength;
+    public long getFileLengthInStorage() {
+        return fileLengthInStorage;
     }
 
-    public void setFileLength(int fileLength) {
-        this.fileLength = fileLength;
+    public void setFileLengthInStorage(long fileLengthInStorage) {
+        this.fileLengthInStorage = fileLengthInStorage;
     }
 
     @Override
     public void run() {
-        long fileSizeInLocalStorage = Long.valueOf(fileLengthInStorage);
+        long fileSizeInLocalStorage = fileLengthInStorage;
         BufferedInputStream input = null;
         try {
             final FileOutputStream out = new FileOutputStream(pathToSaveVideo, true);
@@ -218,7 +218,7 @@ public class VideoDownloader implements Runnable {
                     int len;
                     boolean flag = true;
 
-                    while ((len = input.read(data)) != -1) {
+                    while (!Thread.currentThread().isInterrupted() && (len = input.read(data)) != -1) {
                         out.write(data, 0, len);
                         out.flush();
                         readBytes += len;
@@ -226,6 +226,7 @@ public class VideoDownloader implements Runnable {
                         Log.w("download", (readb) + "b of " + (fileLength) + "b");
                     }
                 }
+                videoDownloaderCallbacks.onVideoDownloaded();
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             } catch (IOException e) {
@@ -243,12 +244,15 @@ public class VideoDownloader implements Runnable {
         }
 
 
-        videoDownloaderCallbacks.onVideoDownloaded();
-
     }
 
     public boolean cancel(boolean b) {
         return false;
+    }
+
+
+    public void onNetworkChanged(boolean b) {
+
     }
 
     public interface VideoDownloaderCallbacks {

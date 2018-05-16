@@ -25,4 +25,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="end"
         android:text="Go to Video 2" />
+
+
+
 </FrameLayout>

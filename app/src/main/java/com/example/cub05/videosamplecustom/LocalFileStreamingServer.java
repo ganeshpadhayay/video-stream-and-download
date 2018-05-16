@@ -34,32 +34,52 @@ public class LocalFileStreamingServer implements Runnable, VideoDownloader.Video
     private int port = 0;
     private boolean isRunning = false;
     private ServerSocket socket;
-    private Thread thread;
+    private Thread thread, videoDownloadingThread;
     private long cbSkip;
     private boolean seekRequest;
     private File mMovieFile;
     private Context context;
     private LocalFileStreamingServerCallBacks localFileStreamingServerCallBacks;
+    private VideoStreamAndDownload.ProgressBarCallbacks progressBarCallbacks;
 
     private boolean supportPlayWhileDownloading = false;
-
+    private boolean videoDownloadingStopped = false;
     private VideoDownloader videoDownloader;
 
     /**
      * This server accepts HTTP request and returns files from device.
      */
-    public LocalFileStreamingServer(File file, Context context, LocalFileStreamingServerCallBacks localFileStreamingServerCallBacks, String videoUrl, String pathToSaveVideo, String fileLength) {
+    public LocalFileStreamingServer(File file, Context context, LocalFileStreamingServerCallBacks localFileStreamingServerCallBacks, String videoUrl, String pathToSaveVideo, long fileLength, VideoStreamAndDownload.ProgressBarCallbacks progressBarCallbacks) {
         this.videoDownloader = new VideoDownloader(context, LocalFileStreamingServer.this, videoUrl, pathToSaveVideo, fileLength);
-        Thread thread = new Thread(this.videoDownloader);
-        thread.start();
+        videoDownloadingThread = new Thread(this.videoDownloader);
+        videoDownloadingThread.start();
 //        videoDownloader.execute(videoUrl, pathToSaveVideo, fileLength);
         this.localFileStreamingServerCallBacks = localFileStreamingServerCallBacks;
         mMovieFile = file;
         this.context = context;
+        this.progressBarCallbacks = progressBarCallbacks;
     }
 
-    public boolean stopVideoDownloading() {
-        return videoDownloader.cancel(true);
+    public void stopVideoDownloading() {
+
+        videoDownloadingThread.interrupt();
+        videoDownloadingStopped = true;
+    }
+
+
+    public void startVideoDownloading(long fileLength) {
+        if (videoDownloadingThread.isInterrupted() || videoDownloadingStopped) {
+            Log.e("sachin", "thread start");
+            videoDownloader.setFileLengthInStorage(fileLength);
+            videoDownloadingThread = new Thread(videoDownloader);
+            videoDownloadingThread.start();
+
+        }
+    }
+
+
+    public void onNetworkChanged(boolean b) {
+        videoDownloader.onNetworkChanged(b);
     }
 
     /**
@@ -290,16 +310,16 @@ public class LocalFileStreamingServer implements Runnable, VideoDownloader.Video
                             Log.e(TAG, "(All Data consumed)");
                             break;
                         } else if (videoDownloader.getDataStatus() == videoDownloader.getDATA_NOT_READY()) {
-                            Log.e(TAG, "(Data not ready)");
+                            Log.e("sachin", "(Data not ready)");
                         } else if (videoDownloader.getDataStatus() == videoDownloader.getDATA_NOT_AVAILABLE()) {
                             Log.e(TAG, "(Data not available)");
                         }
                         // wait for a second if data is not ready
                         synchronized (this) {
-                            Thread.sleep(200);
+                            Thread.sleep(1000);
                         }
                     }
-                    Log.e(TAG, "(Data ready)");
+                    Log.e("sachin", "(Data ready)");
                 } else {
                     Log.d("sachin", "supportPlayWhileDownloading false");
                 }
@@ -323,17 +343,24 @@ public class LocalFileStreamingServer implements Runnable, VideoDownloader.Video
 ////                                "Error re-opening data source for looping.");
 ////                    }
 //                }
-                if (supportPlayWhileDownloading)
-                    while (cbRead == -1) {
-                        synchronized (this) {
-                            Thread.sleep(1000);
+                if (supportPlayWhileDownloading) {
+                    if (cbRead < 51200) {
+                        progressBarCallbacks.startProgressbar();
+                        while (cbRead == -1) {
+                            synchronized (this) {
+                                Thread.sleep(1000);
+                            }
+                            cbRead = data.read(buff, 0, buff.length);
+                            Log.e(TAG, "ready bytes are -1 and this is simulate streaming, close the ips and create another  ");
                         }
-                        cbRead = data.read(buff, 0, buff.length);
-                        Log.e(TAG, "ready bytes are -1 and this is simulate streaming, close the ips and create another  ");
-                    }
-
+                    } else
+                        progressBarCallbacks.stopProgressbar();
+                }
                 client.getOutputStream().write(buff, 0, cbRead);
                 client.getOutputStream().flush();
+
+                progressBarCallbacks.stopProgressbar();
+
                 cbSkip += cbRead;
                 cbSentThisBatch += cbRead;
 
@@ -486,6 +513,7 @@ public class LocalFileStreamingServer implements Runnable, VideoDownloader.Video
     public void onVideoDownloaded() {
         supportPlayWhileDownloading = false;
     }
+
 
     /**
      * provides meta-data and access to a stream for resources on SD card.

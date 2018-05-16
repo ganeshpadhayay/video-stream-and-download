@@ -48,7 +48,7 @@ public class VideoStreamAndDownload implements LocalFileStreamingServer.LocalFil
 
 
         Log.d("sachin", "file size " + file.length());
-        server = new LocalFileStreamingServer(file, activity, VideoStreamAndDownload.this, videoUrl, pathToSaveVideo, String.valueOf(file.length()));
+        server = new LocalFileStreamingServer(file, activity, VideoStreamAndDownload.this, videoUrl, pathToSaveVideo, file.length(), progressBarCallbacks);
         server.setSupportPlayWhileDownloading(true);
 
         new Thread(new Runnable() {
@@ -72,6 +72,7 @@ public class VideoStreamAndDownload implements LocalFileStreamingServer.LocalFil
                             @Override
                             public void onPrepared(MediaPlayer mp) {
                                 playVideo();
+
                                 mp.setOnSeekCompleteListener(new MediaPlayer.OnSeekCompleteListener() {
                                     @Override
                                     public void onSeekComplete(MediaPlayer mp) {
@@ -128,6 +129,15 @@ public class VideoStreamAndDownload implements LocalFileStreamingServer.LocalFil
         server.stopVideoDownloading();
     }
 
+    public void stopDownloading() {
+        server.stopVideoDownloading();
+    }
+
+    public void startDownloading(long fileLength) {
+        server.startVideoDownloading(fileLength);
+    }
+
+
     public void saveInstanceState(Bundle outState) {
         Log.e("test", "play state is : " + videoView.isPlaying() + " play time is : " + videoView.getCurrentPosition());
         outState.putBoolean("play_state", videoView.isPlaying());
@@ -140,6 +150,10 @@ public class VideoStreamAndDownload implements LocalFileStreamingServer.LocalFil
         stopPosition = playTime;
         Log.e("test", "play state is : " + playState + " play time is : " + playTime);
         videoView.seekTo(playTime);
+    }
+
+    public void onNetworkChanged(boolean b) {
+        server.onNetworkChanged(b);
     }
 
 
