@@ -2,6 +2,7 @@ package com.example.cub05.videosamplecustom;
 
 import android.app.Activity;
 import android.media.MediaPlayer;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -85,6 +86,27 @@ public class VideoStreamAndDownload implements LocalFileStreamingServer.LocalFil
                                 });
                             }
                         });
+
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                            videoView.setOnInfoListener(new MediaPlayer.OnInfoListener() {
+                                @Override
+                                public boolean onInfo(MediaPlayer mp, int what, int extra) {
+                                    if (what == 701) {
+                                        Log.e("sachin", "media player buffering start");
+                                        mediaController.hide();
+                                        progressBarCallbacks.startProgressbar();
+                                        return true;
+                                    } else if (what == 702) {
+                                        mediaController.show();
+                                        Log.e("sachin", "media player buffering stop");
+                                        progressBarCallbacks.stopProgressbar();
+                                        return true;
+                                    }
+                                    return false;
+                                }
+                            });
+                        }
+
 //                        videoView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
 //                            @Override
 //                            public void onViewAttachedToWindow(View v) {

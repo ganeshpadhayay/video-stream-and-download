@@ -59,9 +59,9 @@ public class MainActivity extends Activity implements VideoStreamAndDownload.Pro
 //            e.printStackTrace();
 //        }
 
-//        String videoUrl = "http://dev.xshowroom.in:8080/content/579953aca6f92bb52a5c14270eee7015/images/how_to_make_a_great_developer_5af151f9ef021.mp4";
-     //   String videoUrl="http://dev.xshowroom.in:8080/content/579953aca6f92bb52a5c14270eee7015/images/The%20Engineers%20talking%20tom%20new%20funny%20video_5aabf2d6cb40e.mp4";
-        String videoUrl="http://dev.xshowroom.in:8080/content/579953aca6f92bb52a5c14270eee7015/images/2_5abcbd3e31d31.mp4";
+        String videoUrl = "http://dev.xshowroom.in:8080/content/579953aca6f92bb52a5c14270eee7015/images/how_to_make_a_great_developer_5af151f9ef021.mp4";
+//           String videoUrl="http://dev.xshowroom.in:8080/content/579953aca6f92bb52a5c14270eee7015/images/The%20Engineers%20talking%20tom%20new%20funny%20video_5aabf2d6cb40e.mp4";
+//        String videoUrl = "http://dev.xshowroom.in:8080/content/579953aca6f92bb52a5c14270eee7015/images/2_5abcbd3e31d31.mp4";
 
         videoStreamAndDownload = new VideoStreamAndDownload(mediaController, videoView, MainActivity.this);
         videoStreamAndDownload.onCreate(file, file.getAbsolutePath(), videoUrl);
@@ -112,22 +112,27 @@ public class MainActivity extends Activity implements VideoStreamAndDownload.Pro
 
     @Override
     public void stopProgressbar() {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                progressBar.setVisibility(View.GONE);
-            }
-        });
+        synchronized (this) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    progressBar.setVisibility(View.GONE);
+                }
+            });
+        }
+
     }
 
     @Override
     public void startProgressbar() {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                progressBar.setVisibility(View.VISIBLE);
-            }
-        });
+        synchronized (this) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    progressBar.setVisibility(View.VISIBLE);
+                }
+            });
+        }
     }
 
     @Override

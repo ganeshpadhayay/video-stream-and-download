@@ -48,7 +48,7 @@ public class VideoDownloader implements Runnable {
         } else if (readb > consumedb) {
             dataStatus = DATA_READY;
             res = true;
-        } else if ((readb-.01*readb) <= consumedb) {
+        } else if ((readb - .01 * readb) <= consumedb) {
             dataStatus = DATA_NOT_READY;
             res = false;
         } else if (fileLength == -1) {
@@ -245,11 +245,6 @@ public class VideoDownloader implements Runnable {
 
 
     }
-
-    public boolean cancel(boolean b) {
-        return false;
-    }
-
 
     public void onNetworkChanged(boolean b) {
 
