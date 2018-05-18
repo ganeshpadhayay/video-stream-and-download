@@ -45,6 +45,7 @@ public class SecondActivity extends Activity implements VideoStreamAndDownload.P
         }
 
         String videoUrl = "http://dev.xshowroom.in:8080/content/579953aca6f92bb52a5c14270eee7015/images/code_refractoring_5af1615350f5e.mp4";
+//        String videoUrl = "http://dev.xshowroom.in:8080/content/579953aca6f92bb52a5c14270eee7015/images/2_5abcbd3e31d31.mp4";
 
 
         videoStreamAndDownload = new VideoStreamAndDownload(mediaController, videoView, SecondActivity.this);

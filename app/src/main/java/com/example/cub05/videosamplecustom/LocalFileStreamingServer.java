@@ -263,13 +263,15 @@ public class LocalFileStreamingServer implements Runnable, VideoDownloader.Video
             // header
             Log.e("sachin", "in seekRequest if condition");
             if (cbSkip > dataSource.getContentLength(true)) {
-                while (cbSkip > videoDownloader.getReadb()) {
-                    localFileStreamingServerCallBacks.pauseVideo();
+//                while (cbSkip > videoDownloader.getReadb()) {
+//                    progressBarCallbacks.startProgressbar();
 //                    Log.e("sachin ", cbSkip + " cbSkip");
 //                    Log.e("sachin ", videoDownloader.getReadb() + " readDb");
-                }
+//                }
                 Log.e("sachin", "before play video");
-                localFileStreamingServerCallBacks.playVideo();
+                progressBarCallbacks.startProgressbar();
+            } else {
+                progressBarCallbacks.stopProgressbar();
             }
 
             headers += "HTTP/1.1 206 Partial Content\r\n";
@@ -299,7 +301,7 @@ public class LocalFileStreamingServer implements Runnable, VideoDownloader.Video
 
             // Start sending content.
 
-            byte[] buff = new byte[1024 * 50];
+            byte[] buff = new byte[1024 * 10];
             Log.e(TAG, "No of bytes skipped: " + data.skip(cbSkip));
             int cbSentThisBatch = 0;
 
@@ -311,14 +313,11 @@ public class LocalFileStreamingServer implements Runnable, VideoDownloader.Video
                 Log.e("sachin", "cbread -" + cbRead);
                 if (supportPlayWhileDownloading)
                     while (cbRead == -1) {
-//                        progressBarCallbacks.startProgressbar();
                         synchronized (this) {
                             Thread.sleep(1000);
                         }
                         cbRead = data.read(buff, 0, buff.length);
-                        Log.e(TAG, "ready bytes are -1 and this is simulate streaming, close the ips and create another  ");
-                    }
-//                progressBarCallbacks.stopProgressbar();
+                      }
                 client.getOutputStream().write(buff, 0, cbRead);
                 client.getOutputStream().flush();
 

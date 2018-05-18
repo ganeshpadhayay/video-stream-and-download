@@ -60,6 +60,10 @@ public class MainActivity extends Activity implements VideoStreamAndDownload.Pro
 //        }
 
         String videoUrl = "http://dev.xshowroom.in:8080/content/579953aca6f92bb52a5c14270eee7015/images/how_to_make_a_great_developer_5af151f9ef021.mp4";
+     //   String videoUrl = "http://dev.xshowroom.in:8080/content/579953aca6f92bb52a5c14270eee7015/images/videoplayback_5afc078e03d79.mp4";
+//        String videoUrl = "http://dev.xshowroom.in:8080/content/579953aca6f92bb52a5c14270eee7015/images/h1_rocks2_5afd419cb49c7.mp4";
+
+
 //           String videoUrl="http://dev.xshowroom.in:8080/content/579953aca6f92bb52a5c14270eee7015/images/The%20Engineers%20talking%20tom%20new%20funny%20video_5aabf2d6cb40e.mp4";
 //        String videoUrl = "http://dev.xshowroom.in:8080/content/579953aca6f92bb52a5c14270eee7015/images/2_5abcbd3e31d31.mp4";
 

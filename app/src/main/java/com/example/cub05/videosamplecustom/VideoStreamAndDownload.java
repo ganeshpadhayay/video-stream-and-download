@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.MediaController;
+import android.widget.SeekBar;
 import android.widget.Toast;
 import android.widget.VideoView;
 
@@ -69,6 +70,9 @@ public class VideoStreamAndDownload implements LocalFileStreamingServer.LocalFil
                         videoView.setVideoPath(server.getFileUrl());
                         videoView.start();
                         videoView.requestFocus();
+
+
+
                         videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                             @Override
                             public void onPrepared(MediaPlayer mp) {
@@ -78,6 +82,9 @@ public class VideoStreamAndDownload implements LocalFileStreamingServer.LocalFil
                                     @Override
                                     public void onSeekComplete(MediaPlayer mp) {
 //                                        if (playState) {
+
+                                        Log.e("media", "seek complete");
+                                        progressBarCallbacks.stopProgressbar();
                                         videoView.start();
 //                                        }
 
@@ -91,14 +98,15 @@ public class VideoStreamAndDownload implements LocalFileStreamingServer.LocalFil
                             videoView.setOnInfoListener(new MediaPlayer.OnInfoListener() {
                                 @Override
                                 public boolean onInfo(MediaPlayer mp, int what, int extra) {
-                                    if (what == 701) {
+                                    if (what == MediaPlayer.MEDIA_INFO_BUFFERING_START) {
                                         Log.e("sachin", "media player buffering start");
                                         mediaController.hide();
+//                                        mediaController.setVisibility(View.GONE);
                                         progressBarCallbacks.startProgressbar();
-                                        return true;
-                                    } else if (what == 702) {
-                                        mediaController.show();
+
+                                    } else if (what == MediaPlayer.MEDIA_INFO_BUFFERING_END) {
                                         Log.e("sachin", "media player buffering stop");
+//                                        mediaController.setVisibility(View.VISIBLE);
                                         progressBarCallbacks.stopProgressbar();
                                         return true;
                                     }
@@ -107,17 +115,6 @@ public class VideoStreamAndDownload implements LocalFileStreamingServer.LocalFil
                             });
                         }
 
-//                        videoView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
-//                            @Override
-//                            public void onViewAttachedToWindow(View v) {
-//                                Toast.makeText(activity, "onViewAttachedToWindow", Toast.LENGTH_SHORT).show();
-//                            }
-//
-//                            @Override
-//                            public void onViewDetachedFromWindow(View v) {
-//                                Toast.makeText(activity, "onViewDetachedFromWindow", Toast.LENGTH_SHORT).show();
-//                            }
-//                        });
                     }
                 });
             }
@@ -185,4 +182,5 @@ public class VideoStreamAndDownload implements LocalFileStreamingServer.LocalFil
         void startProgressbar();
 
     }
+
 }
