@@ -5,10 +5,7 @@ import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.MediaController;
-import android.widget.SeekBar;
-import android.widget.Toast;
 import android.widget.VideoView;
 
 import java.io.File;
@@ -17,7 +14,7 @@ import java.io.File;
  * Created by cub05 on 5/3/2018.
  */
 
-public class VideoStreamAndDownload implements LocalFileStreamingServer.LocalFileStreamingServerCallBacks {
+public class VideoStreamAndDownload {
 
 
     private VideoView videoView;
@@ -50,12 +47,13 @@ public class VideoStreamAndDownload implements LocalFileStreamingServer.LocalFil
 
 
         Log.d("sachin", "file size " + file.length());
-        server = new LocalFileStreamingServer(file, activity, VideoStreamAndDownload.this, videoUrl, pathToSaveVideo, file.length(), progressBarCallbacks);
+        server = new LocalFileStreamingServer(file, videoUrl, pathToSaveVideo, file.length(), progressBarCallbacks);
         server.setSupportPlayWhileDownloading(true);
 
         new Thread(new Runnable() {
             @Override
             public void run() {
+
                 server.init(ipOfServer);
 
                 activity.runOnUiThread(new Runnable() {
@@ -72,7 +70,6 @@ public class VideoStreamAndDownload implements LocalFileStreamingServer.LocalFil
                         videoView.requestFocus();
 
 
-
                         videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                             @Override
                             public void onPrepared(MediaPlayer mp) {
@@ -81,12 +78,10 @@ public class VideoStreamAndDownload implements LocalFileStreamingServer.LocalFil
                                 mp.setOnSeekCompleteListener(new MediaPlayer.OnSeekCompleteListener() {
                                     @Override
                                     public void onSeekComplete(MediaPlayer mp) {
-//                                        if (playState) {
 
                                         Log.e("media", "seek complete");
                                         progressBarCallbacks.stopProgressbar();
                                         videoView.start();
-//                                        }
 
 
                                     }
@@ -101,12 +96,10 @@ public class VideoStreamAndDownload implements LocalFileStreamingServer.LocalFil
                                     if (what == MediaPlayer.MEDIA_INFO_BUFFERING_START) {
                                         Log.e("sachin", "media player buffering start");
                                         mediaController.hide();
-//                                        mediaController.setVisibility(View.GONE);
                                         progressBarCallbacks.startProgressbar();
 
                                     } else if (what == MediaPlayer.MEDIA_INFO_BUFFERING_END) {
                                         Log.e("sachin", "media player buffering stop");
-//                                        mediaController.setVisibility(View.VISIBLE);
                                         progressBarCallbacks.stopProgressbar();
                                         return true;
                                     }
@@ -123,7 +116,6 @@ public class VideoStreamAndDownload implements LocalFileStreamingServer.LocalFil
     }
 
 
-    @Override
     public void pauseVideo() {
 //        Log.e("sachin", "paused");
         progressBarCallbacks.startProgressbar();
@@ -136,7 +128,6 @@ public class VideoStreamAndDownload implements LocalFileStreamingServer.LocalFil
         }
     }
 
-    @Override
     public void playVideo() {
         Log.e("sachin", "resumed");
         progressBarCallbacks.stopProgressbar();
@@ -169,10 +160,6 @@ public class VideoStreamAndDownload implements LocalFileStreamingServer.LocalFil
         stopPosition = playTime;
         Log.e("test", "play state is : " + playState + " play time is : " + playTime);
         videoView.seekTo(playTime);
-    }
-
-    public void onNetworkChanged(boolean b) {
-        server.onNetworkChanged(b);
     }
 
 

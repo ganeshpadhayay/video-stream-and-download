@@ -60,7 +60,7 @@ public class MainActivity extends Activity implements VideoStreamAndDownload.Pro
 //        }
 
         String videoUrl = "http://dev.xshowroom.in:8080/content/579953aca6f92bb52a5c14270eee7015/images/how_to_make_a_great_developer_5af151f9ef021.mp4";
-     //   String videoUrl = "http://dev.xshowroom.in:8080/content/579953aca6f92bb52a5c14270eee7015/images/videoplayback_5afc078e03d79.mp4";
+        //   String videoUrl = "http://dev.xshowroom.in:8080/content/579953aca6f92bb52a5c14270eee7015/images/videoplayback_5afc078e03d79.mp4";
 //        String videoUrl = "http://dev.xshowroom.in:8080/content/579953aca6f92bb52a5c14270eee7015/images/h1_rocks2_5afd419cb49c7.mp4";
 
 
@@ -125,6 +125,12 @@ public class MainActivity extends Activity implements VideoStreamAndDownload.Pro
             });
         }
 
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(mNetworkReceiver);
     }
 
     @Override
