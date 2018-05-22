@@ -67,7 +67,8 @@ public class MainActivity extends Activity implements VideoStreamAndDownload.Pro
 //           String videoUrl="http://dev.xshowroom.in:8080/content/579953aca6f92bb52a5c14270eee7015/images/The%20Engineers%20talking%20tom%20new%20funny%20video_5aabf2d6cb40e.mp4";
 //        String videoUrl = "http://dev.xshowroom.in:8080/content/579953aca6f92bb52a5c14270eee7015/images/2_5abcbd3e31d31.mp4";
 
-        videoStreamAndDownload = new VideoStreamAndDownload(mediaController, videoView, MainActivity.this);
+//        videoStreamAndDownload = new VideoStreamAndDownload(mediaController, videoView, MainActivity.this);
+        videoStreamAndDownload = VideoStreamAndDownloadFactory.getVideoStreamAndDownloadObject(mediaController, videoView, MainActivity.this);
         videoStreamAndDownload.onCreate(file, file.getAbsolutePath(), videoUrl);
 
         button.setOnClickListener(new View.OnClickListener() {

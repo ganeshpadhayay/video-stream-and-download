@@ -14,8 +14,9 @@ import android.net.NetworkInfo;
 public class NetworkChangeReceiver extends BroadcastReceiver {
 
     NetworkChangeCallback networkChangeCallback;
+
     public NetworkChangeReceiver(MainActivity mainActivity) {
-        this.networkChangeCallback=mainActivity;
+        this.networkChangeCallback = mainActivity;
     }
 
     @Override
@@ -43,7 +44,7 @@ public class NetworkChangeReceiver extends BroadcastReceiver {
         }
     }
 
-    public interface NetworkChangeCallback{
+    public interface NetworkChangeCallback {
         void onNetworkChange(boolean internetPresent);
     }
 }

@@ -47,7 +47,8 @@ public class VideoStreamAndDownload {
 
 
         Log.d("sachin", "file size " + file.length());
-        server = new LocalFileStreamingServer(file, videoUrl, pathToSaveVideo, file.length(), progressBarCallbacks);
+        server = VideoStreamAndDownloadFactory.getServer(file, videoUrl, pathToSaveVideo, file.length(), progressBarCallbacks);
+//        server = new LocalFileStreamingServer(file, videoUrl, pathToSaveVideo, file.length(), progressBarCallbacks);
         server.setSupportPlayWhileDownloading(true);
 
         new Thread(new Runnable() {
